@@ -1,0 +1,26 @@
+{
+    "name": "dpdro/magento2-shipping",
+    "description": "DPD Ro Magento2 Shipping",
+    "require": {
+      "php": ">=8.0",
+      "magento/module-shipping": "*"
+    },
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": "proprietary",
+    "authors": [
+      {
+        "name": "DPD",
+        "email": "api.support@dpd.ro",
+        "homepage": "https://www.dpd.com/ro/ro/"
+      }
+    ],
+    "autoload": {
+      "files": [
+        "registration.php"
+      ],
+      "psr-4": {
+        "DpdRo\\Shipping\\": ""
+      }
+    }
+  }

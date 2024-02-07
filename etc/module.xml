@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * 
+ *
+ * @category    DpdRo
+ * @package     DpdRo_Shipping
+ * @copyright   Copyright (c) DPD Ro (https://www.dpd.com/ro/ro/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="DpdRo_Shipping" setup_version="1.0.0">
+        <sequence>
+            <module name="Magento_Shipping"/>
+        </sequence>
+    </module>
+</config>
