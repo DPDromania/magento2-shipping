@@ -56,6 +56,20 @@ class InstallSchema implements InstallSchemaInterface
         $setup->getConnection()->createTable($table);
 
         /**
+         * Create table 'dpdro_payment'
+         */
+        $table = $setup->getConnection()
+            ->newTable($setup->getTable('dpdro_payment'))
+            ->addColumn('id',                    Table::TYPE_INTEGER, null, ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true], 'Comment')
+            ->addColumn('countryID',             Table::TYPE_TEXT, 255, ['nullable' => true, 'default' => ''], 'Comment')
+            ->addColumn('tax',                   Table::TYPE_TEXT, 255, ['nullable' => true, 'default' => ''], 'Comment')
+            ->addColumn('vat',                   Table::TYPE_TEXT, 255, ['nullable' => true, 'default' => ''], 'Comment')
+            ->addColumn('status',                Table::TYPE_TEXT, 255, ['nullable' => true, 'default' => ''], 'Comment')
+            ->addColumn('created',               Table::TYPE_DATETIME, null, ['nullable' => false], 'Comment')
+            ->setComment("DPD RO Order Courier Table");
+        $setup->getConnection()->createTable($table);
+        
+        /**
          * Create table 'dpdro_order_tax_rates'
          */
         $table = $setup->getConnection()

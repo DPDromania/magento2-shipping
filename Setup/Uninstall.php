@@ -19,6 +19,7 @@ class Uninstall implements UninstallInterface
          */
         $setup->getConnection()->dropTable($setup->getTable('dpdro_settings'));
         $setup->getConnection()->dropTable($setup->getTable('dpdro_addresses'));
+        $setup->getConnection()->dropTable($setup->getTable('dpdro_payment'));
         $setup->getConnection()->dropTable($setup->getTable('dpdro_order_tax_rates'));
         $setup->getConnection()->dropTable($setup->getTable('dpdro_order_address'));
         $setup->getConnection()->dropTable($setup->getTable('dpdro_order_settings'));

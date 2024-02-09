@@ -17,5 +17,14 @@
                 <active>1</active>
             </dpdro_shipping>
         </carriers>
+        <payment>
+            <dpdro_payment>
+                <model>DpdRo\Shipping\Model\Payment</model>
+                <order_status>pending_payment</order_status>
+                <title>DPD RO Payment</title>
+                <sort_order>10</sort_order>
+                <active>1</active>
+            </dpdro_payment>
+        </payment>
     </default>
 </config>

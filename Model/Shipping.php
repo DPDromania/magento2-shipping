@@ -106,7 +106,7 @@ class Shipping extends AbstractCarrier implements CarrierInterface
     protected function _methodTemplate($serviceID, $price)
     {
         $obj = ObjectManager::getInstance();
-        $apiRequest = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
         $apiServices = $apiRequest->ListServices();
         $price = (float) $price;
         $method = $this->_rateMethodFactory->create();
