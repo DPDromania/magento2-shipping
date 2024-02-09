@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="DpdRo\Shipping\Api\PaymentInformationManagementInterface"
+                type="DpdRo\Shipping\Service\V1\PaymentInformationManagement"/>
+    <preference for="DpdRo\Shipping\Api\GuestPaymentInformationManagementInterface"
+                type="DpdRo\Shipping\Service\V1\GuestPaymentInformationManagement"/>
+    <type name="Magento\Quote\Model\Quote\Address\ToOrder">
+        <plugin name="addCashOnDeliveryFeeToOrder" type="DpdRo\Shipping\Plugin\Quote\CashOnDeliveryFeeToOrder"/>
+    </type>
+    <type name="Magento\Sales\Block\Order\Totals">
+        <plugin name="addCashOnDeliveryTotal" type="DpdRo\Shipping\Plugin\Order\AddCashOnDeliveryFeeToTotalsBlock"/>
+    </type>
+    <type name="Magento\Sales\Model\Order">
+        <plugin name="setCashOnDeliveryExtensionAfterLoad" type="DpdRo\Shipping\Plugin\Order\LoadCashOnDeliveryFee"/>
+    </type>
+    <type name="Magento\Sales\Model\OrderRepository">
+        <plugin name="getCashOnDeliveryExtensionBeforeSave" type="DpdRo\Shipping\Plugin\Order\SaveCashOnDeliveryFee"/>
+    </type>
+    <type name="Magento\Sales\Model\ResourceModel\Order\Collection">
+        <plugin name="setCashOnDeliveryExtensionAfterLoad" type="DpdRo\Shipping\Plugin\Order\LoadCashOnDeliveryFeeOnCollection"/>
+    </type>
+
+    <!-- Agreements in checkout fix -->
+    <type name="Magento\CheckoutAgreements\Model\AgreementsValidator">
+        <plugin name="skipAgreementsValidation" type="DpdRo\Shipping\Plugin\CheckoutAgreements\Model\AgreementsValidator" sortOrder="1" />
+    </type>
+
+    <!-- Correct Max amount calculation -->
+    <type name="Magento\Payment\Model\Checks\TotalMinMax">
+        <plugin name="checkTotalMinMax" type="DpdRo\Shipping\Plugin\Payment\Model\ChecksTotalMinMax" sortOrder="1" />
+    </type>
+</config>

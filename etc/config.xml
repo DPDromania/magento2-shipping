@@ -18,6 +18,9 @@
             </dpdro_shipping>
         </carriers>
         <payment>
+            <cashondelivery>
+                <fee>0.00</fee>
+            </cashondelivery>
             <dpdro_payment>
                 <model>DpdRo\Shipping\Model\Payment</model>
                 <order_status>pending_payment</order_status>
