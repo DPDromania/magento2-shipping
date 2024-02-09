@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @category    DpdRo
+ * @package     DpdRo_Shipping
+ * @copyright   Copyright (c) DPD Ro (https://www.dpd.com/ro/ro/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <carriers>
+            <dpdro_shipping>
+                <sallowspecific>0</sallowspecific>
+                <model>DpdRo\Shipping\Model\Shipping</model>
+                <title>DPD RO Shipping</title>
+                <sort_order>10</sort_order>
+                <active>1</active>
+            </dpdro_shipping>
+        </carriers>
+    </default>
+</config>
