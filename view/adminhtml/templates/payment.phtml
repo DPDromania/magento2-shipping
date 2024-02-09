@@ -1,0 +1,157 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$obj = ObjectManager::getInstance();
+$apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
+$data = [
+    'connected' => $apiRequest->CheckConnection(),
+    'settings'  => $apiRequest->Settings(),
+    'tax'       => $apiRequest->DPD_GetPaymentTax()
+];
+?>
+<div class="dpdro-container js-dpdro-container">
+    <?php if ($data['connected'] == 'success') : ?>
+        <!-- ================================================================================== -->
+        <!-- RESPONSE -->
+        <div class="dpdro-alert js-dpdro-alert" role="alert">
+            <span></span>
+            <button type="button" class="js-dpdro-alert-close">×</button>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- PAYMENT TAX -->
+        <table>
+            <thead>
+                <tr>
+                    <th><?php echo __('Country'); ?></th>
+                    <th><?php echo __('Tax in decimals (ex: 1.00)'); ?></th>
+                    <th><?php echo __('VAT in % (ex: 19)'); ?></th>
+                    <th><?php echo __('Status'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($data['tax'] && !empty($data['tax'])) : ?>
+                    <?php foreach ($data['tax'] as $tax) : ?>
+                        <tr data-country="<?php echo $tax['countryID']; ?>" class="js-dpdro-payment-tax">
+                            <?php if ($tax['countryID'] == 'BG') : ?>
+                                <td>Bulgaria</td>
+                            <?php elseif ($tax['countryID'] == 'GR') : ?>
+                                <td>Greece</td>
+                            <?php elseif ($tax['countryID'] == 'HU') : ?>
+                                <td>Hungary</td>
+                            <?php elseif ($tax['countryID'] == 'PL') : ?>
+                                <td>Poland</td>
+                            <?php elseif ($tax['countryID'] == 'RO') : ?>
+                                <td>Romania</td>
+                            <?php endif; ?>
+                            <td><input name="js-dpdro-tax" type="text" value="<?php echo $tax['tax']; ?>" placeholder="0" class="form-control"></td>
+                            <td><input name="js-dpdro-vat" type="text" value="<?php echo $tax['vat']; ?>" placeholder="0" class="form-control"></td>
+                            <td>
+                                <select name="js-dpdro-status">
+                                    <?php if ($tax['status'] == '1') : ?>
+                                        <option value="1" selected="selected"><?php echo __('Enabled'); ?></option>
+                                        <option value="0"><?php echo __('Disabled'); ?></option>
+                                    <?php else : ?>
+                                        <option value="1"><?php echo __('Enabled'); ?></option>
+                                        <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                                    <?php endif; ?>
+                                </select>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr data-country="BG" class="js-dpdro-payment-tax">
+                        <td>Bulgaria</td>
+                        <td><input name="js-dpdro-tax" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td><input name="js-dpdro-vat" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td>
+                            <select name="js-dpdro-status">
+                                <option value="1"><?php echo __('Enabled'); ?></option>
+                                <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr data-country="GR" class="js-dpdro-payment-tax">
+                        <td>Greece</td>
+                        <td><input name="js-dpdro-tax" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td><input name="js-dpdro-vat" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td>
+                            <select name="js-dpdro-status">
+                                <option value="1"><?php echo __('Enabled'); ?></option>
+                                <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr data-country="HU" class="js-dpdro-payment-tax">
+                        <td>Hungary</td>
+                        <td><input name="js-dpdro-tax" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td><input name="js-dpdro-vat" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td>
+                            <select name="js-dpdro-status">
+                                <option value="1"><?php echo __('Enabled'); ?></option>
+                                <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr data-country="PL" class="js-dpdro-payment-tax">
+                        <td>Poland</td>
+                        <td><input name="js-dpdro-tax" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td><input name="js-dpdro-vat" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td>
+                            <select name="js-dpdro-status">
+                                <option value="1"><?php echo __('Enabled'); ?></option>
+                                <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr data-country="RO" class="js-dpdro-payment-tax">
+                        <td>Romania</td>
+                        <td><input name="js-dpdro-tax" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td><input name="js-dpdro-vat" type="text" value="0" placeholder="0" class="form-control"></td>
+                        <td>
+                            <select name="js-dpdro-status">
+                                <option value="1"><?php echo __('Enabled'); ?></option>
+                                <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                <?php endif ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4">
+                        <button class="button success js-dpdro-payment-tax-save" type="button"><?php echo __('Save'); ?></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <p class="dpdro-info">
+                            <span><?php echo __('* NOTE'); ?></span>
+                            <?php echo __('1. Will automatically add an extra tax to the payment from DPD Service.'); ?>
+                            <br>
+                            <?php echo __('2. Payment tax caluclation:'); ?>
+                            <br>
+                            <?php echo __('Total tax = Country Tax + ((Country Tax * Country VAT) / 100) + DPD Service Payment Tax'); ?>
+                        </p>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    <?php else : ?>
+        <!-- ================================================================================== -->
+        <!-- MESSAGE -->
+        <p class="dpdro-message">
+            <?php echo __('In order for payment tax to work you must be connected!'); ?>
+        </p>
+    <?php endif; ?>
+</div>
+<script type="text/javascript">
+    require([
+        "prototype"
+    ], function() {
+        window.DPDRO_PaymentTax_Save = '<?= $block->getUrl('dpd/payment/save') ?>';
+        window.DPDRO_PaymentTax_Text = {
+            'error': '<?php echo __('Oops, An error occured, please try again later!'); ?>',
+        };
+    });
+</script>

@@ -1,0 +1,219 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$obj = ObjectManager::getInstance();
+$store = $obj->create('\Magento\Store\Model\StoreManagerInterface');
+$apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
+$page = 1;
+$orderBy = 'id';
+$orderDirection = 'ASC';
+if (isset($_GET['page']) && !empty($_GET['page'])) {
+    $page = (int) $_GET['page'];
+}
+if (isset($_GET['orderBy']) && !empty($_GET['orderBy'])) {
+    $orderBy = $_GET['orderBy'];
+}
+if (isset($_GET['orderDirection']) && !empty($_GET['orderDirection'])) {
+    $orderDirection = $_GET['orderDirection'];
+}
+$data = [
+    'api'              => $apiRequest->ApiUrl(),
+    'connected'        => $apiRequest->CheckConnection(),
+    'settings'         => $apiRequest->Settings(),
+    'addresses'        => $apiRequest->DPD_GetAddresses($page, $orderBy, $orderDirection),
+    'pagination'       => $apiRequest->DPD_GetAddressesPagination(),
+];
+$totalPages = $data['pagination'];
+$addressesUrl = $store->getStore()->getUrl('dpd/addresses/index');
+$addressesSorting = '&orderBy=' . $orderBy . '&orderDirection=' . $orderDirection;
+$formKey = $obj->get('Magento\Framework\Data\Form\FormKey');
+?>
+<div class="dpdro-container js-dpdro-container">
+    <?php if ($data['connected'] == 'success') : ?>
+        <!-- ================================================================================== -->
+        <!-- RESPONSE -->
+        <div class="dpdro-alert js-dpdro-alert" role="alert">
+            <span></span>
+            <button type="button" class="js-dpdro-alert-close">×</button>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- INFO -->
+        <p class="dpdro-info">
+            <span><?php echo __('* DPD addresses list:'); ?></span>
+            <?php echo __('1. Romania: '); ?>
+            <a href="<?php echo $data['api']; ?>location/site/csv/642?username=<?php echo $data['settings']['username']; ?>&password=<?php echo $data['settings']['password']; ?>" target="_blank"><?php echo __('Download'); ?></a>
+            <br>
+            <?php echo __('2. Bulgaria: '); ?>
+            <a href="<?php echo $data['api']; ?>location/site/csv/100?username=<?php echo $data['settings']['username']; ?>&password=<?php echo $data['settings']['password']; ?>" target="_blank"><?php echo __('Download'); ?></a>
+        </p>
+        <hr>
+        <!-- ================================================================================== -->
+        <!-- IMPORT -->
+        <form method="POST" action="<?= $block->getUrl('dpd/addresses/import') ?>" class="dpdro-import" enctype="multipart/form-data">
+            <span><?php echo __('Import addresses from file'); ?></span>
+            <input name="form_key" type="hidden" value="<?php echo $formKey->getFormKey(); ?>">
+            <input name="file" type="file" data-validate="{required:true}">
+            <span><?php echo __('Select country'); ?></span>
+            <select id="js-dpdro-import-country" name="country">
+                <option value=""><?php echo __(' --- Please Select --- '); ?></option>
+                <option value="642"><?php echo __('Romania'); ?></option>
+                <option value="100"><?php echo __('Bulgaria'); ?></option>
+            </select>
+            <button type="submit" class="button success"><?php echo __('Import'); ?></button>
+            <a href="<?= $block->getUrl('dpd/addresses/imported') ?>" class="button warning"><?php echo __('Import RO / BG addresses from base file'); ?></a>
+        </form>
+        <hr>
+        <!-- ================================================================================== -->
+        <!-- ADDRESSES -->
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <?php echo __('DPD country ID / Name'); ?>
+                        <a class="dpdro-sorting asc <?php if ($orderBy == 'countryID' && $orderDirection == 'ASC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=countryID&orderDirection=ASC'; ?>">&#x25B2;</a>
+                        <a class="dpdro-sorting desc <?php if ($orderBy == 'countryID' && $orderDirection == 'DESC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=countryID&orderDirection=DESC'; ?>">&#x25BC;</a>
+                    </th>
+                    <th>
+                        <?php echo __('Region / State / Province'); ?>
+                        <a class="dpdro-sorting asc <?php if ($orderBy == 'region' && $orderDirection == 'ASC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=region&orderDirection=ASC'; ?>">&#x25B2;</a>
+                        <a class="dpdro-sorting desc <?php if ($orderBy == 'region' && $orderDirection == 'DESC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=region&orderDirection=DESC'; ?>">&#x25BC;</a>
+                    </th>
+                    <th>
+                        <?php echo __('Address type'); ?>
+                        <a class="dpdro-sorting asc <?php if ($orderBy == 'type' && $orderDirection == 'ASC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=type&orderDirection=ASC'; ?>">&#x25B2;</a>
+                        <a class="dpdro-sorting desc <?php if ($orderBy == 'type' && $orderDirection == 'DESC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=type&orderDirection=DESC'; ?>">&#x25BC;</a>
+                    </th>
+                    <th>
+                        <?php echo __('Address name'); ?>
+                        <a class="dpdro-sorting asc <?php if ($orderBy == 'name' && $orderDirection == 'ASC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=name&orderDirection=ASC'; ?>">&#x25B2;</a>
+                        <a class="dpdro-sorting desc <?php if ($orderBy == 'name' && $orderDirection == 'DESC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=name&orderDirection=DESC'; ?>">&#x25BC;</a>
+                    </th>
+                    <th>
+                        <?php echo __('Address municipality'); ?>
+                        <a class="dpdro-sorting asc <?php if ($orderBy == 'municipality' && $orderDirection == 'ASC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=municipality&orderDirection=ASC'; ?>">&#x25B2;</a>
+                        <a class="dpdro-sorting desc <?php if ($orderBy == 'municipality' && $orderDirection == 'DESC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=municipality&orderDirection=DESC'; ?>">&#x25BC;</a>
+                    </th>
+                    <th>
+                        <?php echo __('Postcode'); ?>
+                        <a class="dpdro-sorting asc <?php if ($orderBy == 'postCode' && $orderDirection == 'ASC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=postCode&orderDirection=ASC'; ?>">&#x25B2;</a>
+                        <a class="dpdro-sorting desc <?php if ($orderBy == 'postCode' && $orderDirection == 'DESC') : ?>current<?php endif; ?>" href="<?php echo $addressesUrl . '?page=' . $page . '&orderBy=postCode&orderDirection=DESC'; ?>">&#x25BC;</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($data['addresses'] && !empty($data['addresses'])) : ?>
+                    <?php foreach ($data['addresses'] as $address) : ?>
+                        <tr>
+                            <td>
+                                <?php echo $address['countryID']; ?>
+                                <?php if ($address['countryID'] == '642') : ?>
+                                    / Romania
+                                <?php endif; ?>
+                                <?php if ($address['countryID'] == '100') : ?>
+                                    / Bulgaria
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php echo $address['region']; ?>
+                            </td>
+                            <td>
+                                <?php echo $address['type']; ?>
+                            </td>
+                            <td>
+                                <?php echo $address['name']; ?>
+                            </td>
+                            <td>
+                                <?php echo $address['municipality']; ?>
+                            </td>
+                            <td>
+                                <?php echo $address['postCode']; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if ($totalPages > 1 && ceil($totalPages / 50) > 0) : ?>
+                        <tr>
+                            <td colspan="11">
+                                <ul class="dpdro-pagination">
+                                    <?php if ($page > 1) : ?>
+                                        <li class="page prev">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ($page - 1) . $addressesSorting; ?>"><?php echo __('Prev'); ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page > 3) : ?>
+                                        <li class="page start">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=1' . $addressesSorting; ?>">1</a>
+                                        </li>
+                                        <li class="page dots">
+                                            <span>...</span>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page - 2 > 0) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ($page - 2) . $addressesSorting; ?>"><?php echo $page - 2 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page - 1 > 0) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ($page - 1) . $addressesSorting; ?>"><?php echo $page - 1 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <li class="page current">
+                                        <span><?php echo $page ?></span>
+                                    </li>
+                                    <?php if ($page + 1 < ceil($totalPages / 50) + 1) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ($page + 1) . $addressesSorting; ?>"><?php echo $page + 1 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page + 2 < ceil($totalPages / 50) + 1) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ($page + 2) . $addressesSorting; ?>"><?php echo $page + 2 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page < ceil($totalPages / 50) - 2) : ?>
+                                        <li class="page dots">
+                                            <span>...</span>
+                                        </li>
+                                        <li class="page end">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ceil($totalPages / 50) . $addressesSorting; ?>"><?php echo ceil($totalPages / 50) ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page < ceil($totalPages / 50)) : ?>
+                                        <li class="page next">
+                                            <a class="button primary" href="<?php echo $addressesUrl . '?page=' . ($page + 1) . $addressesSorting; ?>"><?php echo __('Next'); ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="11">
+                            <p class="dpdro-message">
+                                <?php echo __('There are no dpd addresses imported'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    <?php else : ?>
+        <!-- ================================================================================== -->
+        <!-- MESSAGE -->
+        <p class="dpdro-message">
+            <?php echo __('In order for addresses to work you must be connected!'); ?>
+        </p>
+    <?php endif; ?>
+</div>
+<script type="text/javascript">
+    require([
+        "prototype"
+    ], function() {
+        window.DPDRO_Addresses_Import = '<?= $block->getUrl('dpd/addresses/import') ?>';
+        window.DPDRO_Addresses_Text = {
+            'error': '<?php echo __('Oops, An error occured, please try again later!'); ?>',
+        };
+    });
+</script>

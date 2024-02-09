@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+	<head>
+		<title>
+			DPD RO Addresses
+		</title>
+	</head>
+	<body>
+		<referenceContainer name="content">
+			<block class="Magento\Backend\Block\Template" template="DpdRo_Shipping::addresses.phtml" />
+		</referenceContainer>
+	</body>
+</page>

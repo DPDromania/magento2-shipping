@@ -1,0 +1,643 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$obj = ObjectManager::getInstance();
+$store = $obj->create('\Magento\Store\Model\StoreManagerInterface');
+$apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
+$page = 1;
+if (isset($_GET['page']) && !empty($_GET['page'])) {
+    $page = (int) $_GET['page'];
+}
+$ordersData = $apiRequest->Magento_GetOrdersData($page);
+$totalPages = $apiRequest->Magento_GetOrdersPagination();
+$data = [
+    'connected'        => $apiRequest->CheckConnection(),
+    'settings'         => $apiRequest->Settings(),
+    'orders'           => $ordersData['orders'],
+    'ordersLink'       => $ordersData['ordersLink'],
+    'ordersTotal'      => $ordersData['ordersTotal'],
+    'ordersPagination' => $ordersData['ordersPagination'],
+    'requestCourier'   => $ordersData['requestCourier'],
+];
+$ordersUrl = $store->getStore()->getUrl('dpd/orders/index');
+?>
+<div class="dpdro-container js-dpdro-container">
+    <?php if ($data['connected'] == 'success') : ?>
+        <!-- ================================================================================== -->
+        <!-- RESPONSE -->
+        <div class="dpdro-alert js-dpdro-alert" role="alert">
+            <span></span>
+            <button type="button" class="js-dpdro-alert-close">×</button>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- ORDERS -->
+        <table>
+            <thead>
+                <tr>
+                    <?php if ($data['requestCourier']) : ?>
+                        <th class="advanced"><?php echo __('Request courier'); ?></th>
+                    <?php endif; ?>
+                    <th><?php echo __('Order ID'); ?></th>
+                    <?php if ($data['settings']['advanced']  == 'yes') : ?>
+                        <th class="advanced"><?php echo __('Courier service'); ?></th>
+                        <th class="advanced"><?php echo __('Include payment'); ?></th>
+                        <th class="advanced"><?php echo __('Include insurance'); ?></th>
+                    <?php endif; ?>
+                    <th><?php echo __('Customer'); ?></th>
+                    <th><?php echo __('Status'); ?></th>
+                    <th><?php echo __('Total'); ?></th>
+                    <th><?php echo __('Date Added'); ?></th>
+                    <th><?php echo __('Shipping'); ?></th>
+                    <th><?php echo __('Payment'); ?></th>
+                    <th><?php echo __('Action'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($data['orders'] && !empty($data['orders'])) : ?>
+                    <?php foreach ($data['orders'] as $order) : ?>
+                        <?php
+                        if ($order['orderStatus'] == 'complete' && $order['orderStatus'] == 'cancel') {
+                            continue;
+                        }
+                        ?>
+                        <tr>
+                            <!-- =========================================================  -->
+                            <!-- ORDER COURIER -->
+                            <?php if ($data['requestCourier']) : ?>
+                                <td>
+                                    <?php if ($order['orderCourier']) : ?>
+                                        <?php if ($order['orderStatus'] == 'complete') : ?>
+                                            <span class="dpdro-badge success"><?php echo __('Finished'); ?></span>
+                                        <?php else : ?>
+                                            <span class="dpdro-badge warning"><?php echo __('In queue'); ?></span>
+                                        <?php endif; ?>
+                                    <?php else : ?>
+                                        <?php if ($order['shipmentData'] && !empty($order['shipmentData'])) : ?>
+                                            <div class="courier">
+                                                <input id="js-dpdro-shipment-request-<?php echo $order['id']; ?>" name="js-dpdro-shipment-request" type="checkbox" value="<?php echo $order['shipmentData']['shipmentID']; ?>" checked="checked" />
+                                                <label for="js-dpdro-shipment-request-<?php echo $order['id']; ?>">
+                                                    <?php echo __('Request courier'); ?>
+                                                </label>
+                                            </div>
+                                        <?php else : ?>
+                                            <span class="dpdro-badge danger"><?php echo __('Require shipment'); ?></span>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
+                            <td><?php echo $order['orderIncrementId']; ?></td>
+                            <!-- =========================================================  -->
+                            <!-- ORDER SETTINGS -->
+                            <?php if ($data['settings']['advanced']  == 'yes') : ?>
+                                <?php if ($order['orderSettings'] && !empty($order['orderSettings'])) : ?>
+                                    <td>
+                                        <?php echo $order['orderSettings']['courierService']; ?>
+                                    </td>
+                                    <td>
+                                        <span class="dpdro-badge <?php echo $order['orderSettings']['includeShipping']; ?>"><?php echo $order['orderSettings']['includeShipping']; ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="dpdro-badge <?php echo $order['orderSettings']['declaredValue']; ?>"><?php echo $order['orderSettings']['declaredValue']; ?></span>
+                                    </td>
+                                <?php else : ?>
+                                    <td>
+                                        <?php echo $data['settings']['payerCourier']; ?>
+                                    </td>
+                                    <td>
+                                        <span class="dpdro-badge <?php echo $data['settings']['senderPayerIncludeShipping']; ?>"><?php echo $data['settings']['senderPayerIncludeShipping']; ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="dpdro-badge <?php echo $data['settings']['senderPayerInsurance']; ?>"><?php echo $data['settings']['senderPayerInsurance']; ?></span>
+                                    </td>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            <td><?php echo $order['address']['email']; ?></td>
+                            <td>
+                                <span class="dpdro-badge status <?php echo $order['orderStatus']; ?>"><?php echo $order['orderStatus']; ?></span>
+                            </td>
+                            <td><?php echo $order['orderTotal'] . ' ' .  $order['orderCurrency']; ?></td>
+                            <td><?php echo $order['orderDate']; ?></td>
+                            <td><?php echo $order['shippingName']; ?></td>
+                            <td><?php echo $order['paymentName']; ?></td>
+                            <td>
+                                <a href="<?php echo $order['orderPreview']; ?>" class="button warning"><?php echo __('Preview'); ?></a>
+                                <?php if (!$order['shipmentData'] || empty($order['shipmentData'])) : ?>
+                                    <button type="button" class="button primary js-dpdro-popup-open"><?php echo __('Create shipment'); ?></button>
+                                    <!-- =========================================================  -->
+                                    <!-- POPUP -->
+                                    <div class="dpdro-popup js-dpdro-popup">
+                                        <div class="container">
+                                            <!-- =========================================================  -->
+                                            <!-- MODAL ANIMATION -->
+                                            <div class="dpdro-loader js-dpdro-loader">
+                                                <span></span>
+                                            </div>
+                                            <!-- =========================================================  -->
+                                            <!-- POPUP HEADER -->
+                                            <div class="header">
+                                                <h4><?php echo __('Shipment creation'); ?></h4>
+                                                <button type="button" class="button danger js-dpdro-popup-close">×</button>
+                                            </div>
+                                            <!-- =========================================================  -->
+                                            <!-- POPUP BODY -->
+                                            <div class="body">
+                                                <?php if ($order['paymentCode'] != 'dpdro_payment') : ?>
+                                                    <div class="dpdro-alert warning js-dpdro-alert" role="alert">
+                                                        <span><?php echo __('We switch <b>"Courier service payer"</b> to <b>"SENDER"</b> because the order has a different payment method.'); ?></span>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <!-- ========================================================= -->
+                                                <!-- ADDRESS VALIDATION -->
+                                                <div class="js-dpdro-order-address-validation">
+                                                    <?php if (isset($order['addressValidation']['validation'])) : ?>
+                                                        <?php if (isset($order['addressValidation']['validation']['valid']) && $order['addressValidation']['validation']['valid']) : ?>
+                                                            <div class="dpdro-alert success js-dpdro-alert" role="alert">
+                                                                <span><?php echo sprintf('Address: <b>%s</b> is a valid address.', $order['addressValidation']['address']['fullAddress']); ?></span>
+                                                            </div>
+                                                            <input class="street-type" type="hidden" value="<?php echo $order['addressValidation']['address']['streetType']; ?>" />
+                                                            <input class="street-name" type="hidden" value="<?php echo $order['addressValidation']['address']['streetName']; ?>" />
+                                                            <input class="number" type="hidden" value="<?php echo $order['addressValidation']['address']['number']; ?>" />
+                                                            <input class="block" type="hidden" value="<?php echo $order['addressValidation']['address']['block']; ?>" />
+                                                            <input class="apartment" type="hidden" value="<?php echo $order['addressValidation']['address']['apartment']; ?>" />
+                                                        <?php else : ?>
+                                                            <?php
+                                                            if ($order['addressStatus'] && $order['addressStatus'] == 'skip') {
+                                                                $validationAlertMessageStyle = 'style="display: none;"';
+                                                                $validationTableHeadStyle = 'style="display: none;"';
+                                                                $validationTableBodyStyle = 'style="display: none;"';
+                                                                $validationSkipStyle = 'style="display: none;"';
+                                                                $validationNormalizeStyle = '';
+                                                            } else {
+                                                                $validationAlertMessageStyle = '';
+                                                                $validationTableHeadStyle = '';
+                                                                $validationTableBodyStyle = '';
+                                                                $validationSkipStyle = '';
+                                                                $validationNormalizeStyle = 'style="display: none;"';
+                                                            }
+                                                            ?>
+                                                            <div <?php echo $validationAlertMessageStyle; ?> class="dpdro-alert danger js-dpdro-alert" role="alert">
+                                                                <span><?php echo $order['addressValidation']['validation']['error']['message']; ?></span>
+                                                            </div>
+                                                            <table class="js-dpdro-order-address-validation-table">
+                                                                <input class="country" type="hidden" value="<?php echo $order['addressValidation']['address']['country']; ?>" />
+                                                                <input class="country-id" type="hidden" value="<?php echo $order['addressValidation']['address']['countryID']; ?>" />
+                                                                <input class="state" type="hidden" value="<?php echo $order['addressValidation']['address']['state']; ?>" />
+                                                                <input class="city" type="hidden" value="<?php echo $order['addressValidation']['address']['city']; ?>" />
+                                                                <input class="city-id" type="hidden" value="<?php echo $order['addressValidation']['address']['cityID']; ?>" />
+                                                                <input class="postcode" type="hidden" value="<?php echo $order['addressValidation']['address']['postcode']; ?>" />
+                                                                <tbody>
+                                                                    <tr <?php echo $validationTableHeadStyle; ?> class="js-dpdro-order-address-validation-table-head">
+                                                                        <th><?php echo __('Country'); ?></th>
+                                                                        <th><?php echo __('Region'); ?></th>
+                                                                        <th><?php echo __('City'); ?></th>
+                                                                        <th><?php echo __('Street name'); ?></th>
+                                                                        <th><?php echo __('Street type'); ?></th>
+                                                                        <th><?php echo __('Nr'); ?></th>
+                                                                        <th><?php echo __('Bl'); ?></th>
+                                                                        <th><?php echo __('Ap'); ?></th>
+                                                                        <th><?php echo __('Sc'); ?></th>
+                                                                        <th><?php echo __('Et'); ?></th>
+                                                                        <th><?php echo __('Action'); ?></th>
+                                                                    </tr>
+                                                                    <tr <?php echo $validationTableBodyStyle; ?> class="js-dpdro-order-address-validation-table-body">
+                                                                        <td><?php echo $order['addressValidation']['address']['country']; ?></td>
+                                                                        <td><?php echo $order['addressValidation']['address']['state']; ?></td>
+                                                                        <td><?php echo $order['addressValidation']['address']['city']; ?></td>
+                                                                        <td>
+                                                                            <div class="field js-dpdro-order-street-search">
+                                                                                <input class="street-name js-dpdro-order-street-search-field" type="text" value="<?php echo $order['addressValidation']['address']['streetName']; ?>">
+                                                                                <div class="dropdown js-dpdro-order-street-search-container">
+                                                                                    <div class="loader">
+                                                                                        <span></span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <input class="street-id" type="hidden" value="0" />
+                                                                                <input class="street-name" type="hidden" value="<?php echo $order['addressValidation']['address']['streetName']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="street-type" type="text" value="<?php echo $order['addressValidation']['address']['streetType']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="number" type="text" value="<?php echo $order['addressValidation']['address']['number']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="block" type="text" value="<?php echo $order['addressValidation']['address']['block']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="apartment" type="text" value="<?php echo $order['addressValidation']['address']['apartment']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="scale" type="text" value="<?php echo $order['addressValidation']['address']['scale']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="floor" type="text" value="<?php echo $order['addressValidation']['address']['floor']; ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <button data-id="<?php echo $order['id']; ?>" type="button" class="button success js-dpdro-order-validation-validate">
+                                                                                <?php echo __('Validate'); ?>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td colspan="8">
+                                                                            <p style="margin: 0;"><?php echo __('Order address is:') . ' ' . $order['addressValidation']['address']['fullAddress']; ?></p>
+                                                                        </td>
+                                                                        <td colspan="3">
+                                                                            <button <?php echo $validationSkipStyle; ?> data-id="<?php echo $order['id']; ?>" type="button" class="button warning js-dpdro-order-validation-skip">
+                                                                                <?php echo __('Skip'); ?>
+                                                                            </button>
+                                                                            <button <?php echo $validationNormalizeStyle; ?> data-id="<?php echo $order['id']; ?>" type="button" class="button primary js-dpdro-order-validation-normalize">
+                                                                                <?php echo __('Normalize'); ?>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        <?php endif; ?>
+                                                    <?php else : ?>
+                                                        <input name="js-dpdro-shipment-address-pickup" type="hidden" value="" />
+                                                        <div class="dpdro-alert success js-dpdro-alert" role="alert">
+                                                            <span><?php echo __('Address normalization is not required.'); ?></span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <p>
+                                                    <strong><?php echo __('Group the products in your shipment into parcels'); ?></strong>
+                                                    <?php echo __('This module lets your organize your products into parcels using the table below. Select parcel number.'); ?>
+                                                </p>
+                                                <!-- ========================================================= -->
+                                                <!-- PRODUCTS -->
+                                                <?php if ($order['orderProducts'] && !empty($order['orderProducts'])) : ?>
+                                                    <?php if (isset($order['orderProducts']['products']) && !empty($order['orderProducts']['products'])) : ?>
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th><?php echo __('ID'); ?></th>
+                                                                    <th><?php echo __('Product'); ?></th>
+                                                                    <th><?php echo __('Weight'); ?></th>
+                                                                    <th><?php echo __('Parcel'); ?></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php $distributionProducts = 1; ?>
+                                                                <?php $distributionParcelQuantity = 0; ?>
+                                                                <?php $distributionParcelQuantityMax = (float) $data['settings']['maxParcelWeight']; ?>
+                                                                <?php foreach ($order['orderProducts']['products'] as $productData) : ?>
+                                                                    <?php for ($i = 0; $i < (int) $productData['quantity']; $i++) : ?>
+                                                                        <tr class="js-dpdro-shipment-products">
+                                                                            <td>
+                                                                                <input class="id" name="" type="hidden" value="<?php echo $productData['id']; ?>" />
+                                                                                <?php echo $productData['id']; ?>
+                                                                            </td>
+                                                                            <td>
+                                                                                <input class="name" name="" type="hidden" value="<?php echo $productData['name']; ?>" />
+                                                                                <?php echo $productData['name']; ?><?php echo $productData['name']; ?>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div class="field info">
+                                                                                    <?php if ($productData['weight'] == '0.0') : ?>
+                                                                                        <input class="weight" name="" type="text" placeholder="<?php echo __('Weight'); ?>" value="0.001" />
+                                                                                    <?php else : ?>
+                                                                                        <input class="weight" name="" type="text" placeholder="<?php echo __('Weight'); ?>" value="<?php echo $productData['weight']; ?>" />
+                                                                                    <?php endif; ?>
+                                                                                    <span><?php echo __('kg'); ?></span>
+                                                                                </div>
+                                                                            </td>
+                                                                            <?php
+                                                                            if (($distributionParcelQuantity + (float) $productData['weight']) <= $distributionParcelQuantityMax) {
+                                                                                $distributionParcelQuantity = $distributionParcelQuantity + (float) $productData['weight'];
+                                                                            } else {
+                                                                                $distributionProducts = $distributionProducts + 1;
+                                                                                $distributionParcelQuantity = (float) $productData['weight'];
+                                                                            }
+                                                                            ?>
+                                                                            <td>
+                                                                                <div class="field">
+                                                                                    <?php if ($data['settings']['packagingMethod']  == 'all') : ?>
+                                                                                        <select class="parcel" name="">
+                                                                                            <?php $select_nr = 1; ?>
+                                                                                            <?php foreach ($order['orderProducts']['products'] as $productDataQuantity) : ?>
+                                                                                                <?php for ($j = 0; $j < (int) $productDataQuantity['quantity']; $j++) : ?>
+                                                                                                    <?php if ($distributionProducts == $select_nr) : ?>
+                                                                                                        <option selected value="<?php echo $select_nr; ?>"><?php echo $select_nr; ?></option>
+                                                                                                    <?php else : ?>
+                                                                                                        <option value="<?php echo $select_nr; ?>"><?php echo $select_nr; ?></option>
+                                                                                                    <?php endif; ?>
+                                                                                                    <?php $select_nr = $select_nr + 1; ?>
+                                                                                                <?php endfor; ?>
+                                                                                            <?php endforeach; ?>
+                                                                                        </select>
+                                                                                    <?php else : ?>
+                                                                                        <input class="parcel" name="" type="text" disabled value="1" />
+                                                                                    <?php endif; ?>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php endfor; ?>
+                                                                <?php endforeach; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                                <p>
+                                                    <strong><?php echo __('Enter description for each parcel'); ?></strong>
+                                                    <?php echo __('You can enter description of each parcel, for communication with courier services, in the fields below.'); ?>
+                                                </p>
+                                                <!-- ========================================================= -->
+                                                <!-- PARCELS -->
+                                                <?php if ($order['orderProducts'] && !empty($order['orderProducts'])) : ?>
+                                                    <?php if (isset($order['orderProducts']['products']) && !empty($order['orderProducts']['products'])) : ?>
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th><?php echo __('Parcel'); ?></th>
+                                                                    <th><?php echo __('Description'); ?></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php if ($data['settings']['packagingMethod']  == 'all') : ?>
+                                                                    <?php $parcels_nr = 1; ?>
+                                                                    <?php foreach ($order['orderProducts']['products'] as $productParcel) : ?>
+                                                                        <?php for ($q = 0; $q < (int) $productParcel['quantity']; $q++) : ?>
+                                                                            <tr class="js-dpdro-shipment-parcels">
+                                                                                <td>
+                                                                                    <div class="field">
+                                                                                        <input class="id" name="" type="text" disabled value="<?php echo $parcels_nr; ?>" />
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="field">
+                                                                                        <input class="description" name="" type="text" placeholder="<?php echo __('Description'); ?>" value="<?php echo $productParcel['id']; ?>" />
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <?php $parcels_nr = $parcels_nr + 1; ?>
+                                                                        <?php endfor; ?>
+                                                                    <?php endforeach; ?>
+                                                                <?php else : ?>
+                                                                    <tr class="js-dpdro-shipment-parcels">
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="id" name="" type="text" disabled value="1" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="field">
+                                                                                <input class="description" name="" type="text" placeholder="<?php echo __('Description'); ?>" value="<?php echo __('Description'); ?>" />
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                <?php endif; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                                <!-- ========================================================= -->
+                                                <!-- SHIPMENT -->
+                                                <div class="field checkbox">
+                                                    <input class="js-dpdro-shipment-swap" id="js-dpdro-shipment-swap-<?php echo $order['id']; ?>" type="checkbox" value="1" />
+                                                    <label for="js-dpdro-shipment-swap-<?php echo $order['id']; ?>"><?php echo __('This is a SWAP shipment'); ?></label>
+                                                </div>
+                                                <div class="field checkbox">
+                                                    <input class="js-dpdro-shipment-rod" id="js-dpdro-shipment-rod-<?php echo $order['id']; ?>" type="checkbox" value="1" />
+                                                    <label for="js-dpdro-shipment-rod-<?php echo $order['id']; ?>"><?php echo __('This is a ROD shipment'); ?></label>
+                                                </div>
+                                                <div class="field checkbox">
+                                                    <input class="js-dpdro-shipment-voucher" id="js-dpdro-shipment-voucher-<?php echo $order['id']; ?>" type="checkbox" value="1" />
+                                                    <label for="js-dpdro-shipment-voucher-<?php echo $order['id']; ?>">
+                                                        <?php echo __('This shipment has a VOUCHER'); ?>
+                                                        <select class="js-dpdro-shipment-voucher-sender">
+                                                            <option selected value="SENDER">SENDER</option>
+                                                            <option value="RECIPIENT">RECIPIENT</option>
+                                                        </select>
+                                                    </label>
+                                                </div>
+                                                <div class="field checkbox">
+                                                    <input class="js-dpdro-shipment-private" id="js-dpdro-shipment-private-<?php echo $order['id']; ?>" type="checkbox" value="1" />
+                                                    <label for="js-dpdro-shipment-private-<?php echo $order['id']; ?>">
+                                                        <?php echo __('This shipment is on company'); ?>
+                                                        <input class="js-dpdro-shipment-private-person" name="" type="text" placeholder="" value="<?php echo $order['orderCompany']; ?>" />
+                                                    </label>
+                                                </div>
+                                                <hr>
+                                                <!-- =========================================================  -->
+                                                <!-- NOTES -->
+                                                <div class="field">
+                                                    <label><?php echo __('Shipment note'); ?></label>
+                                                    <textarea class="js-dpdro-shipment-notes"></textarea>
+                                                </div>
+                                                <!-- =========================================================  -->
+                                                <!-- REF 2 -->
+                                                <div class="field">
+                                                    <label><?php echo __('Shipment ref 2'); ?></label>
+                                                    <input class="js-dpdro-shipment-ref2" type="text" />
+                                                </div>
+                                            </div>
+                                            <!-- =========================================================  -->
+                                            <!-- POPUP FOOTER -->
+                                            <div class="footer">
+                                                <?php if (isset($order['addressValidation']['validation'])) : ?>
+                                                    <?php if (isset($order['addressValidation']['validation']['valid']) && !$order['addressValidation']['validation']['valid']) : ?>
+                                                        <?php
+                                                        if ($order['addressStatus'] && $order['addressStatus'] == 'skip') {
+                                                            $disabled = '';
+                                                        } else {
+                                                            $disabled = 'active';
+                                                        }
+                                                        ?>
+                                                        <div class="disabled js-dpdro-disabled <?php echo $disabled; ?>">
+                                                            <p><?php echo __('You must validate address!'); ?></p>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                                <button type="button" class="button danger js-dpdro-popup-close">
+                                                    <?php echo __('Cancel'); ?>
+                                                </button>
+                                                <button data-id="<?php echo $order['id']; ?>" type="button" class="button success js-dpdro-order-shipment-create">
+                                                    <?php echo __('Save shipment'); ?>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php else : ?>
+                                    <?php if ($order['orderCourier']) : ?>
+                                        <?php if ($order['orderStatus'] == 'complete') : ?>
+                                            <span class="dpdro-badge success"><?php echo __('Picked up'); ?></span>
+                                        <?php else : ?>
+                                            <button data-id="<?php echo $order['id']; ?>" type="button" class="button primary js-dpdro-order-pickup">
+                                                <?php echo __('Picked'); ?>
+                                            </button>
+                                        <?php endif; ?>
+                                    <?php else : ?>
+                                        <a href="<?php echo $order['shipmentPrintLabels'] ?>" target="_blank" class="button success">
+                                            <?php echo __('Print labels'); ?>
+                                        </a>
+                                        <?php if ($order['shipmentPrintVoucher']) : ?>
+                                            <a href="<?php echo $order['shipmentPrintVoucher'] ?>" target="_blank" class="button success">
+                                                <?php echo __('Print voucher'); ?>
+                                            </a>
+                                        <?php endif; ?>
+                                        <a href="https://tracking.dpd.ro/?shipmentNumber=<?php echo $order['shipmentData']['shipmentID']; ?>" target="_blank" class="button primary">
+                                            <?php echo __('Track'); ?>
+                                        </a>
+                                        <button data-id="<?php echo $order['id']; ?>" data-shipment-id="<?php echo $order['shipmentData']['shipmentID']; ?>" type="button" class="button danger js-dpdro-order-shipment-delete">
+                                            <?php echo __('Delete'); ?>
+                                        </button>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if ($data['requestCourier']) : ?>
+                        <tr>
+                            <?php if ($data['settings']['advanced']  == 'yes') : ?>
+                                <td colspan="12">
+                                    <button type="button" class="button primary js-dpdro-order-request">
+                                        <?php echo __('Request courier'); ?>
+                                    </button>
+                                    <a href="<?php echo $data['ordersLink']; ?>" class="button warning">
+                                        <?php echo __('View full orders list'); ?>
+                                    </a>
+                                </td>
+                            <?php else : ?>
+                                <td colspan="9">
+                                    <button type="button" class="button primary js-dpdro-order-request">
+                                        <?php echo __('Request courier'); ?>
+                                    </button>
+                                    <a href="<?php echo $data['ordersLink']; ?>" class="button warning">
+                                        <?php echo __('View full orders list'); ?>
+                                    </a>
+                                </td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php else : ?>
+                        <?php if ($data['settings']['advanced']  == 'yes') : ?>
+                            <tr>
+                                <td colspan="12">
+                                    <a href="<?php echo $data['ordersLink']; ?>" class="button warning">
+                                        <?php echo __('View full orders list'); ?>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php else : ?>
+                            <tr>
+                                <td colspan="9">
+                                    <a href="<?php echo $data['ordersLink']; ?>" class="button warning">
+                                        <?php echo __('View full orders list'); ?>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <?php if ($totalPages > 1 && ceil($totalPages / 50) > 0) : ?>
+                        <tr>
+                            <td colspan="11">
+                                <ul class="dpdro-pagination">
+                                    <?php if ($page > 1) : ?>
+                                        <li class="page prev">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ($page - 1); ?>"><?php echo __('Prev'); ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page > 3) : ?>
+                                        <li class="page start">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=1'; ?>">1</a>
+                                        </li>
+                                        <li class="page dots">
+                                            <span>...</span>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page - 2 > 0) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ($page - 2); ?>"><?php echo $page - 2 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page - 1 > 0) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ($page - 1); ?>"><?php echo $page - 1 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <li class="page current">
+                                        <span><?php echo $page ?></span>
+                                    </li>
+                                    <?php if ($page + 1 < ceil($totalPages / 50) + 1) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ($page + 1); ?>"><?php echo $page + 1 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page + 2 < ceil($totalPages / 50) + 1) : ?>
+                                        <li class="page">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ($page + 2); ?>"><?php echo $page + 2 ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page < ceil($totalPages / 50) - 2) : ?>
+                                        <li class="page dots">
+                                            <span>...</span>
+                                        </li>
+                                        <li class="page end">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ceil($totalPages / 50); ?>"><?php echo ceil($totalPages / 50) ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <?php if ($page < ceil($totalPages / 50)) : ?>
+                                        <li class="page next">
+                                            <a class="button primary" href="<?php echo $ordersUrl . '?page=' . ($page + 1); ?>"><?php echo __('Next'); ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                <?php else : ?>
+                    <?php if ($data['settings']['advanced']  == 'yes') : ?>
+                        <tr>
+                            <td colspan="11">
+                                <p class="dpdro-message">
+                                    <?php echo __('There are no orders with dpd shipping'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="8">
+                                <p class="dpdro-message">
+                                    <?php echo __('There are no orders with dpd shipping'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    <?php else : ?>
+        <!-- ================================================================================== -->
+        <!-- MESSAGE -->
+        <p class="dpdro-message">
+            <?php echo __('In order for orders to work you must be connected!'); ?>
+        </p>
+    <?php endif; ?>
+</div>
+<script type="text/javascript">
+    require([
+        "prototype"
+    ], function() {
+        window.DPDRO_Orders_Validation = '<?= $block->getUrl('dpd/orders/validation') ?>';
+        window.DPDRO_Orders_Request = '<?= $block->getUrl('dpd/orders/request') ?>';
+        window.DPDRO_Orders_Shipment = '<?= $block->getUrl('dpd/orders/shipment') ?>';
+        window.DPDRO_Orders_Text = {
+            'error': '<?php echo __('Oops, An error occured, please try again later!'); ?>',
+        };
+    });
+</script>

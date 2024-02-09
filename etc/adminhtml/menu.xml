@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+	<menu>
+		<add id="DpdRo_Shipping::dpdro" title="DPD RO" translate="title" module="DpdRo_Shipping" sortOrder="71" dependsOnModule="DpdRo_Shipping" resource="DpdRo_Shipping::dpdro" />
+		<add id="DpdRo_Shipping::dpd_settings" title="Settings" translate="title" module="DpdRo_Shipping" sortOrder="10" dependsOnModule="DpdRo_Shipping" parent="DpdRo_Shipping::dpdro" resource="DpdRo_Shipping::settings" action="dpd/settings" />
+		<add id="DpdRo_Shipping::dpd_payment" title="Payment" translate="title" module="DpdRo_Shipping" sortOrder="20" dependsOnModule="DpdRo_Shipping" parent="DpdRo_Shipping::dpdro" resource="DpdRo_Shipping::payment" action="dpd/payment" />
+		<add id="DpdRo_Shipping::dpd_addresses" title="Addresses" translate="title" module="DpdRo_Shipping" sortOrder="30" dependsOnModule="DpdRo_Shipping" parent="DpdRo_Shipping::dpdro" resource="DpdRo_Shipping::addresses" action="dpd/addresses" />
+		<add id="DpdRo_Shipping::dpd_regions" title="Regions" translate="title" module="DpdRo_Shipping" sortOrder="40" dependsOnModule="DpdRo_Shipping" parent="DpdRo_Shipping::dpdro" resource="DpdRo_Shipping::regions" action="dpd/regions" />
+		<add id="DpdRo_Shipping::dpd_taxrates" title="Tax rates" translate="title" module="DpdRo_Shipping" sortOrder="50" dependsOnModule="DpdRo_Shipping" parent="DpdRo_Shipping::dpdro" resource="DpdRo_Shipping::taxrates" action="dpd/taxrates" />
+		<add id="DpdRo_Shipping::dpd_orders" title="Orders" translate="title" module="DpdRo_Shipping" sortOrder="60" dependsOnModule="DpdRo_Shipping" parent="DpdRo_Shipping::dpdro" resource="DpdRo_Shipping::orders" action="dpd/orders" />
+	</menu>
+</config>

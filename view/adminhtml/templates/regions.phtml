@@ -1,0 +1,178 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$obj = ObjectManager::getInstance();
+$store = $obj->create('\Magento\Store\Model\StoreManagerInterface');
+$apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
+$data = [
+    'api'              => $apiRequest->ApiUrl(),
+    'connected'        => $apiRequest->CheckConnection(),
+    'settings'         => $apiRequest->Settings(),
+    'regionsRO'        => $apiRequest->Magento_GetRegionsRO(),
+    'regionsBG'        => $apiRequest->Magento_GetRegionsBG(),
+];
+?>
+<div class="dpdro-container js-dpdro-container">
+    <?php if ($data['connected'] == 'success') : ?>
+        <!-- ================================================================================== -->
+        <!-- RESPONSE -->
+        <div class="dpdro-alert js-dpdro-alert" role="alert">
+            <span></span>
+            <button type="button" class="js-dpdro-alert-close">×</button>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- INFO -->
+        <p class="dpdro-info">
+            <span><?php echo __('* Here are listed only regions from: <b>"Romania"</b> and <b>"Bulgaria"</b>'); ?></span>
+            <span><?php echo __('* NOTE:'); ?></span>
+            <?php echo __('1. The <b>"Import from dpd addresses"</b> button will <b>not override</b> regions!'); ?></b>
+            <br>
+            <?php echo __('2. The <b>"Update"</b> button will update region data!'); ?>
+            <br>
+            <?php echo __('3. The <b>"Delete"</b> button will delete region data!'); ?>
+        </p>
+        <hr>
+        <!-- ================================================================================== -->
+        <!-- REGIONS -->
+        <div class="dpdro-regions">
+            <!-- ================================================================================== -->
+            <!-- ROMANIA -->
+            <div class="dpdro-regions-list">
+                <h4>
+                    <?php echo __('Romania regions'); ?>
+                    <button type="button" data-country="642" class="button success js-dpdro-region-import"><?php echo __('Import from dpd addresses'); ?></button>
+                </h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php echo __('Index'); ?></th>
+                            <th><?php echo __('Region code'); ?></th>
+                            <th><?php echo __('Region Name'); ?></th>
+                            <th><?php echo __('Actions'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="js-dpdro-region">
+                            <td></td>
+                            <td>
+                                <input type="hidden" class="country" value="RO" />
+                                <input type="text" class="code" placeholder="<?php echo __('Code'); ?>" />
+                            </td>
+                            <td>
+                                <input type="text" class="name" placeholder="<?php echo __('Name'); ?>" />
+                            </td>
+                            <td>
+                                <button type="button" class="button success js-dpdro-region-add"><?php echo __('Add new region'); ?></button>
+                            </td>
+                        </tr>
+                        <?php if ($data['regionsRO'] && !empty($data['regionsRO'])) : ?>
+                            <?php foreach ($data['regionsRO'] as $key => $region) : ?>
+                                <tr class="js-dpdro-region">
+                                    <td><?php echo ($key + 1); ?></td>
+                                    <td>
+                                        <span data-value="<?php echo $region['code']; ?>" class="code"><?php echo $region['code']; ?></span>
+                                    </td>
+                                    <td>
+                                        <span data-value="<?php echo $region['default_name']; ?>" class="name"><?php echo $region['default_name']; ?></span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="button primary js-dpdro-region-edit"><?php echo __('Edit'); ?></button>
+                                        <button data-id="<?php echo $region['region_id']; ?>" type="button" class="button danger js-dpdro-region-delete"><?php echo __('Delete'); ?></button>
+                                        <button data-id="<?php echo $region['region_id']; ?>" data-country="RO" type="button" class="hide button success js-dpdro-region-update"><?php echo __('Update'); ?></button>
+                                        <button type="button" class="hide button danger js-dpdro-region-cancel"><?php echo __('Cancel'); ?></button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <tr>
+                                <td colspan="11">
+                                    <p class="dpdro-message">
+                                        <?php echo __('There are no regions for Romania'); ?>
+                                    </p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <!-- ================================================================================== -->
+            <!-- BULGARIA -->
+            <div class="dpdro-regions-list">
+                <h4>
+                    <?php echo __('Bulgaria regions'); ?>
+                    <button type="button" data-country="100" class="button success js-dpdro-region-import"><?php echo __('Import from dpd addresses'); ?></button>
+                </h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php echo __('Index'); ?></th>
+                            <th><?php echo __('Region code'); ?></th>
+                            <th><?php echo __('Region Name'); ?></th>
+                            <th><?php echo __('Actions'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="js-dpdro-region">
+                            <td></td>
+                            <td>
+                                <input type="hidden" class="country" value="BG" />
+                                <input type="text" class="code" placeholder="<?php echo __('Code'); ?>" />
+                            </td>
+                            <td>
+                                <input type="text" class="name" placeholder="<?php echo __('Name'); ?>" />
+                            </td>
+                            <td>
+                                <button type="button" class="button success js-dpdro-region-add"><?php echo __('Add new region'); ?></button>
+                            </td>
+                        </tr>
+                        <?php if ($data['regionsBG'] && !empty($data['regionsBG'])) : ?>
+                            <?php foreach ($data['regionsBG'] as $key => $region) : ?>
+                                <tr class="js-dpdro-region">
+                                    <td><?php echo ($key + 1); ?></td>
+                                    <td>
+                                        <span data-value="<?php echo $region['code']; ?>" class="code"><?php echo $region['code']; ?></span>
+                                    </td>
+                                    <td>
+                                        <span data-value="<?php echo $region['default_name']; ?>" class="name"><?php echo $region['default_name']; ?></span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="button primary js-dpdro-region-edit"><?php echo __('Edit'); ?></button>
+                                        <button data-id="<?php echo $region['region_id']; ?>" type="button" class="button danger js-dpdro-region-delete"><?php echo __('Delete'); ?></button>
+                                        <button data-id="<?php echo $region['region_id']; ?>" data-country="BG" type="button" class="hide button success js-dpdro-region-update"><?php echo __('Update'); ?></button>
+                                        <button type="button" class="hide button danger js-dpdro-region-cancel"><?php echo __('Cancel'); ?></button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <tr>
+                                <td colspan="11">
+                                    <p class="dpdro-message">
+                                        <?php echo __('There are no regions for Bulgaria'); ?>
+                                    </p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php else : ?>
+        <!-- ================================================================================== -->
+        <!-- MESSAGE -->
+        <p class="dpdro-message">
+            <?php echo __('In order for regions to work you must be connected!'); ?>
+        </p>
+    <?php endif; ?>
+</div>
+<script type="text/javascript">
+    require([
+        "prototype"
+    ], function() {
+        window.DPDRO_Regions_Import = '<?= $block->getUrl('dpd/regions/import') ?>';
+        window.DPDRO_Regions_Save = '<?= $block->getUrl('dpd/regions/save') ?>';
+        window.DPDRO_Regions_Text = {
+            'error': '<?php echo __('Oops, An error occured, please try again later!'); ?>',
+        };
+    });
+</script>

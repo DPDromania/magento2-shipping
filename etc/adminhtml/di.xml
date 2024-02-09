@@ -1,0 +1,8 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<type name="Magento\Backend\Block\Widget\Button\Toolbar">
+		<plugin name="DpdRo_Shipping::pluginBefore" type="DpdRo\Shipping\Plugin\PluginBefore" />
+	</type>
+	<type name="Magento\Sales\Model\Order\AddressRepository">
+		<plugin name="custom_order_status" type="DpdRo\Shipping\Plugin\OrderAddressAfterSave" sortOrder="1" disabled="false" />
+	</type>
+</config>

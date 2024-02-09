@@ -1,0 +1,390 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$obj = ObjectManager::getInstance();
+$apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
+$data = [
+    'connected'               => $apiRequest->CheckConnection(),
+    'listServices'            => $apiRequest->ListServices(),
+    'listClientContracts'     => $apiRequest->ListClientContracts(),
+    'listOfficeLocations'     => $apiRequest->ListOfficeLocations(),
+    'listPayerCourier'        => $apiRequest->ListPayerCourier(),
+    'listPrintFormat'         => $apiRequest->ListPrintFormat(),
+    'listPrintPaperSize'      => $apiRequest->ListPrintPaperSize(),
+    'settings'                => $apiRequest->Settings()
+];
+?>
+<div class="dpdro-container js-dpdro-container">
+    <!-- ================================================================================== -->
+    <!-- RESPONSE -->
+    <div class="dpdro-alert js-dpdro-alert" role="alert">
+        <span></span>
+        <button type="button" class="js-dpdro-alert-close">×</button>
+    </div>
+    <!-- ================================================================================== -->
+    <!-- CONNECTION -->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"><?php echo __('Edit DPD Connection'); ?></h3>
+        </div>
+        <div class="panel-body">
+            <div class="field">
+                <label><?php echo __('Username'); ?></label>
+                <div class="field-content">
+                    <input type="text" name="js-dpdro-username" value="<?php echo $data['settings']['username']; ?>" placeholder="<?php echo __('Username'); ?>" />
+                </div>
+            </div>
+            <div class="field">
+                <label><?php echo __('Password'); ?></label>
+                <div class="field-content">
+                    <input type="text" name="js-dpdro-password" value="<?php echo $data['settings']['password']; ?>" placeholder="<?php echo __('Password'); ?>" />
+                </div>
+            </div>
+            <div class="field">
+                <label></label>
+                <div class="field-content">
+                    <button class="button success js-dpdro-save" type="button"><?php echo __('Check connection'); ?></button>
+                    <?php if ($data['connected'] && $data['connected'] != 'success') : ?>
+                        <p class="connection error"><?php echo $data['connected']; ?></p>
+                    <?php endif; ?>
+                    <?php if ($data['connected'] == 'success') : ?>
+                        <p class="connection success"><?php echo __('Connection successfully established!'); ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php if ($data['connected'] == 'success') : ?>
+        <input type="hidden" name="js-dpdro-connected" value="" />
+        <!-- ================================================================================== -->
+        <!-- PACKAGING -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo __('Edit DPD Packaging Method'); ?></h3>
+            </div>
+            <div class="panel-body">
+                <div class="field">
+                    <label><?php echo __('Packaging method'); ?></label>
+                    <div class="field-content">
+                        <?php if (isset($data['settings']['packagingMethod']) && !empty($data['settings']['packagingMethod']) && $data['settings']['packagingMethod'] == 'one') : ?>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-packaging-method" value="one" checked="checked">
+                                    <?php echo __('One parcel for all product'); ?>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-packaging-method" value="all">
+                                    <?php echo __('One parcel for one product'); ?>
+                                </label>
+                            </div>
+                        <?php else : ?>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-packaging-method" value="one">
+                                    <?php echo __('One parcel for all product'); ?>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-packaging-method" value="all" checked="checked">
+                                    <?php echo __('One parcel for one product'); ?>
+                                </label>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="field">
+                    <label></label>
+                    <div class="field-content">
+                        <button class="button primary js-dpdro-save" type="button"><?php echo __('Save settings'); ?></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- SERVICES -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo __('Edit DPD Services'); ?></h3>
+            </div>
+            <div class="panel-body">
+                <div class="field">
+                    <label><?php echo __('Services'); ?></label>
+                    <div class="field-content">
+                        <?php
+                        foreach ($data['listServices'] as $key => $value) {
+                            $selected = '';
+                            if (isset($data['settings']['services']) && !empty($data['settings']['services'])) {
+                                if (in_array($key, $data['settings']['services'])) {
+                                    $selected = 'checked="checked"';
+                                }
+                            }
+                            echo '
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="js-dpdro-service-' . $key . '" value="' . $key . '" ' . $selected . ' />
+                                    ' . $value . '
+                                </label>
+                            </div>
+                        ';
+                        }
+                        ?>
+                        <hr>
+                        <button class="button warning js-dpdro-select" type="button"><?php echo __('Select All'); ?></button>
+                        <button class="button warning js-dpdro-unselect" type="button"><?php echo __('Unselect All'); ?></button>
+                        <button class="button primary js-dpdro-save" type="button"><?php echo __('Save settings'); ?></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- SENDER & PAYER & PRINT -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo __('Edit DPD Sender &amp; Payer &amp; Printer'); ?></h3>
+            </div>
+            <div class="panel-body">
+                <div class="field">
+                    <label><?php echo __('Address client ID'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-client-contracts-selected">
+                            <option value="0"><?php echo __(' --- Please Select --- '); ?></option>
+                            <?php
+                            foreach ($data['listClientContracts'] as $key => $value) {
+                                if (isset($data['settings']['clientContracts']) && !empty($data['settings']['clientContracts']) && $data['settings']['clientContracts'] == $key) {
+                                    echo '<option value="' . $key . '" selected="selected">' . $value . '</option>';
+                                } else {
+                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Send from dpdBox'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-office-locations-selected">
+                            <option value="0"><?php echo __(' --- Please Select --- '); ?></option>
+                            <?php
+                            foreach ($data['listOfficeLocations'] as $key => $value) {
+                                if (isset($data['settings']['officeLocations']) && !empty($data['settings']['officeLocations']) && $data['settings']['officeLocations'] == $key) {
+                                    echo '<option value="' . $key . '" selected="selected">' . $value . '</option>';
+                                } else {
+                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Send insurance value'); ?></label>
+                    <div class="field-content">
+                        <?php if (isset($data['settings']['senderPayerInsurance']) && !empty($data['settings']['senderPayerInsurance']) && $data['settings']['senderPayerInsurance'] == 'yes') : ?>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-insurance" value="yes" checked="checked" />
+                                    <?php echo __('Yes'); ?>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-insurance" value="no" />
+                                    <?php echo __('No'); ?>
+                                </label>
+                            </div>
+                        <?php else : ?>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-insurance" value="yes" />
+                                    <?php echo __('Yes'); ?>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-insurance" value="no" checked="checked" />
+                                    <?php echo __('No'); ?>
+                                </label>
+                            </div>
+                        <?php endif; ?>
+                        <p class="help"><?php echo __('Select "Yes" if you want to send the insurance value when creating the shipment'); ?></p>
+                    </div>
+                </div>
+                <div class="field js-dpdro-include-shipping-price-field <?php if (isset($data['settings']['payerCourier']) && !empty($data['settings']['payerCourier']) && $data['settings']['payerCourier'] != 'RECIPIENT') : ?><?php else : ?>hidden<?php endif; ?>">
+                    <label><?php echo __('Include payment price'); ?></label>
+                    <div class="field-content">
+                        <?php if (isset($data['settings']['senderPayerIncludeShipping']) && !empty($data['settings']['senderPayerIncludeShipping']) && $data['settings']['senderPayerIncludeShipping'] == 'yes') : ?>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-include-shipping" value="yes" checked="checked" />
+                                    <?php echo __('Yes'); ?>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-include-shipping" value="no" />
+                                    <?php echo __('No'); ?>
+                                </label>
+                            </div>
+                        <?php else : ?>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-include-shipping" value="yes" />
+                                    <?php echo __('Yes'); ?>
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="js-dpdro-sender-payer-include-shipping" value="no" checked="checked" />
+                                    <?php echo __('No'); ?>
+                                </label>
+                            </div>
+                        <?php endif; ?>
+                        <p class="help"><?php echo __('Add the transport value to the COD amount'); ?></p>
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Courier service payer'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-payer-courier-selected">
+                            <?php
+                            foreach ($data['listPayerCourier'] as $key => $value) {
+                                if (isset($data['settings']['payerCourier']) && !empty($data['settings']['payerCourier']) && $data['settings']['payerCourier'] == $key) {
+                                    echo '<option value="' . $key . '" selected="selected">' . $value . '</option>';
+                                } else {
+                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field js-dpdro-third-party <?php if (isset($data['settings']['payerCourier']) && !empty($data['settings']['payerCourier']) && $data['settings']['payerCourier'] == 'THIRD_PARTY') : ?><?php else : ?>hidden<?php endif; ?>">
+                    <label><?php echo __('ID payer contract'); ?></label>
+                    <div class="field-content">
+                        <input type="text" name="js-dpdro-payer-courier-third-party-id" value="<?php echo $data['settings']['payerCourierThirdParty']; ?>" placeholder="<?php echo __('ID payer contract'); ?>">
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Print format'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-print-format-selected">
+                            <?php
+                            foreach ($data['listPrintFormat'] as $key => $value) {
+                                if (isset($data['settings']['printFormat']) && !empty($data['settings']['printFormat']) && $data['settings']['printFormat'] == $key) {
+                                    echo '<option value="' . $key . '" selected="selected">' . $value . '</option>';
+                                } else {
+                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Print paper size'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-print-paper-size-selected">
+                            <?php
+                            foreach ($data['listPrintPaperSize'] as $key => $value) {
+                                if (isset($data['settings']['printPaperSize']) && !empty($data['settings']['printPaperSize']) && $data['settings']['printPaperSize'] == $key) {
+                                    echo '<option value="' . $key . '" selected="selected">' . $value . '</option>';
+                                } else {
+                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label></label>
+                    <div class="field-content">
+                        <button class="button primary js-dpdro-save" type="button"><?php echo __('Save settings'); ?></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- SETTINGS -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?php echo __('Edit DPD Settings'); ?></h3>
+            </div>
+            <div class="panel-body">
+                <div class="field">
+                    <label><?php echo __('Max parcel weight (kg)'); ?></label>
+                    <div class="field-content">
+                        <?php
+                        $maxParcelWeight = 31.5;
+                        if (isset($data['settings']['maxParcelWeight']) && !empty($data['settings']['maxParcelWeight'])) {
+                            $maxParcelWeight = $data['settings']['maxParcelWeight'];
+                        }
+                        ?>
+                        <input type="text" name="js-dpdro-max-parcel-weight" value="<?php echo $maxParcelWeight; ?>" placeholder="<?php echo __('Max parcel weight (kg)'); ?>">
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Max parcel weight automat (kg)'); ?></label>
+                    <div class="field-content">
+                        <?php
+                        $maxParcelWeightAutomat = 20;
+                        if (isset($data['settings']['maxParcelWeightAutomat']) && !empty($data['settings']['maxParcelWeightAutomat'])) {
+                            $maxParcelWeightAutomat = $data['settings']['maxParcelWeightAutomat'];
+                        }
+                        ?>
+                        <input type="text" name="js-dpdro-max-parcel-weight-automat" value="<?php echo $maxParcelWeightAutomat; ?>" placeholder="<?php echo __('Max parcel weight automat (kg)'); ?>">
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Status'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-status">
+                            <?php if (isset($data['settings']['status']) && !empty($data['settings']['status']) && $data['settings']['status'] == 'yes') : ?>
+                                <option value="yes" selected="selected"><?php echo __('Enabled'); ?></option>
+                                <option value="no"><?php echo __('Disabled'); ?></option>
+                            <?php else : ?>
+                                <option value="yes"><?php echo __('Enabled'); ?></option>
+                                <option value="no" selected="selected"><?php echo __('Disabled'); ?></option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label><?php echo __('Advanced Dashboard'); ?></label>
+                    <div class="field-content">
+                        <select name="js-dpdro-advanced-dashboard">
+                            <?php if (isset($data['settings']['advanced']) && !empty($data['settings']['advanced']) && $data['settings']['advanced'] == 'yes') : ?>
+                                <option value="yes" selected="selected"><?php echo __('Yes'); ?></option>
+                                <option value="no"><?php echo __('No'); ?></option>
+                            <?php else : ?>
+                                <option value="yes"><?php echo __('Yes'); ?></option>
+                                <option value="no" selected="selected"><?php echo __('No'); ?></option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label></label>
+                    <div class="field-content">
+                        <button class="button primary js-dpdro-save" type="button"><?php echo __('Save settings'); ?></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+<script type="text/javascript">
+    require([
+        "prototype"
+    ], function() {
+        window.DPDRO_Settings_Save = '<?= $block->getUrl('dpd/settings/save') ?>';
+        window.DPDRO_Settings_Text = {
+            'error': '<?php echo __('Oops, An error occured, please try again later!'); ?>',
+        };
+    });
+</script>

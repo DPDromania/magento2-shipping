@@ -91,7 +91,7 @@ class Shipping extends AbstractCarrier implements CarrierInterface
     public function getAllowedMethods()
     {
         $obj = ObjectManager::getInstance();
-        $apiRequest = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
         $apiSettings = $apiRequest->Settings();
         $apiServices = $apiRequest->ListServices();
         $methods = [];

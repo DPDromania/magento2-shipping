@@ -91,7 +91,7 @@ class CashOnDeliveryFee extends AbstractTotal
             return (float)null;
         }
         $obj = ObjectManager::getInstance();
-        $apiRequest = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
         $quoteAddress = $quote->getShippingAddress();
         $quoteAddressCountryID = $quoteAddress->getCountryId();
         $paymentData = $apiRequest->DPD_GetPaymentTaxByCountryID($quoteAddressCountryID);

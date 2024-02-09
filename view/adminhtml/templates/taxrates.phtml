@@ -1,0 +1,192 @@
+<?php
+
+use Magento\Framework\App\ObjectManager;
+
+$obj = ObjectManager::getInstance();
+$apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
+$data = [
+    'connected' => $apiRequest->CheckConnection(),
+    'services'  => $apiRequest->ListServices(),
+    'settings'  => $apiRequest->Settings(),
+    'taxRates'  => $apiRequest->DPD_GetTaxRates()
+];
+?>
+<div class="dpdro-container js-dpdro-container">
+    <?php if ($data['connected'] == 'success') : ?>
+        <!-- ================================================================================== -->
+        <!-- RESPONSE -->
+        <div class="dpdro-alert js-dpdro-alert" role="alert">
+            <span></span>
+            <button type="button" class="js-dpdro-alert-close">×</button>
+        </div>
+        <!-- ================================================================================== -->
+        <!-- DISABLED -->
+        <?php if ($data['settings']['payerCourier'] == 'RECIPIENT') : ?>
+            <div class="disabled">
+                <p><?php echo __('In order for tax rates to work you must select "Courier service payer" as "SENDER" or "THIRD PARTY"'); ?></p>
+            </div>
+        <?php endif; ?>
+        <!-- ================================================================================== -->
+        <!-- TAX RATES -->
+        <table>
+            <thead>
+                <tr>
+                    <th><?php echo __('Service'); ?></th>
+                    <th><?php echo __('Condition'); ?></th>
+                    <th><?php echo __('Apply over'); ?></th>
+                    <th><?php echo __('Price / Quantity'); ?></th>
+                    <th><?php echo __('Calculation'); ?></th>
+                    <th><?php echo __('Status'); ?></th>
+                    <th><?php echo __('Action'); ?></th>
+                </tr>
+            </thead>
+            <tbody class="js-dpdro-taxrates">
+                <?php if ($data['taxRates'] && !empty($data['taxRates'])) : ?>
+                    <?php foreach ($data['taxRates'] as $taxRate) : ?>
+                        <tr class="js-dpdro-taxrate">
+                            <td>
+                                <select name="js-dpdro-service-id">
+                                    <?php
+                                    foreach ($data['services'] as $key => $value) {
+                                        if ($taxRate['serviceID'] == $key) {
+                                            echo '<option value="' . $key . '" selected="selected">' . $value . '</option>';
+                                        } else {
+                                            echo '<option value="' . $key . '">' . $value . '</option>';
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="js-dpdro-based-on">
+                                    <?php if ($taxRate['basedOn'] == '1') : ?>
+                                        <option value="1" selected="selected"><?php echo __('Based on price'); ?></option>
+                                        <option value="0"><?php echo __('Based on weight'); ?></option>
+                                    <?php else : ?>
+                                        <option value="1"><?php echo __('Based on price'); ?></option>
+                                        <option value="0" selected="selected"><?php echo __('Based on weight'); ?></option>
+                                    <?php endif; ?>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="js-dpdro-apply-over" type="text" value="<?php echo ($taxRate['applyOver'] && !empty($taxRate['applyOver'])) ? $taxRate['applyOver'] : '0.00'; ?>" placeholder="" class="form-control">
+                            </td>
+                            <td>
+                                <input name="js-dpdro-tax-rate" type="text" value="<?php echo ($taxRate['taxRate'] && !empty($taxRate['taxRate'])) ? $taxRate['taxRate'] : '0.00'; ?>" placeholder="" class="form-control">
+                            </td>
+                            <td>
+                                <select name="js-dpdro-calculation-type">
+                                    <?php if ($taxRate['calculationType'] == '1') : ?>
+                                        <option value="1" selected="selected"><?php echo __('Fixed'); ?></option>
+                                        <option value="0"><?php echo __('Percentage'); ?></option>
+                                    <?php else : ?>
+                                        <option value="1"><?php echo __('Fixed'); ?></option>
+                                        <option value="0" selected="selected"><?php echo __('Percentage'); ?></option>
+                                    <?php endif; ?>
+                                </select>
+                            </td>
+                            <td>
+                                <select name="js-dpdro-status">
+                                    <?php if ($taxRate['status'] == '1') : ?>
+                                        <option value="1" selected="selected"><?php echo __('Enabled'); ?></option>
+                                        <option value="0"><?php echo __('Disabled'); ?></option>
+                                    <?php else : ?>
+                                        <option value="1"><?php echo __('Enabled'); ?></option>
+                                        <option value="0" selected="selected"><?php echo __('Disabled'); ?></option>
+                                    <?php endif; ?>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="button danger js-dpdro-taxrate-delete" data-id="<?php echo $taxRate['id']; ?>" type="button"><?php echo __('Delete tax rate'); ?></button>
+                                <button class="button success js-dpdro-taxrate-save" data-id="<?php echo $taxRate['id']; ?>" type="button"><?php echo __('Update tax rate'); ?></button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr class="js-dpdro-taxrate">
+                        <td>
+                            <select name="js-dpdro-service-id">
+                                <?php
+                                foreach ($data['services'] as $key => $value) {
+                                    echo '<option value="' . $key . '">' . $value . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </td>
+                        <td>
+                            <select name="js-dpdro-based-on">
+                                <option value="1" selected="selected"><?php echo __('Based on price'); ?></option>
+                                <option value="0"><?php echo __('Based on weight'); ?></option>
+                            </select>
+                        </td>
+                        <td>
+                            <input name="js-dpdro-apply-over" type="text" value="0.00" placeholder="0" class="form-control">
+                        </td>
+                        <td>
+                            <input name="js-dpdro-tax-rate" type="text" value="0.00" placeholder="0" class="form-control">
+                        </td>
+                        <td>
+                            <select name="js-dpdro-calculation-type">
+                                <option value="1" selected="selected"><?php echo __('Fixed'); ?></option>
+                                <option value="0"><?php echo __('Percentage'); ?></option>
+                            </select>
+                        </td>
+                        <td>
+                            <select name="js-dpdro-status">
+                                <option value="1" selected="selected"><?php echo __('Enabled'); ?></option>
+                                <option value="0"><?php echo __('Disabled'); ?></option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="button danger js-dpdro-taxrate-delete" type="button"><?php echo __('Delete tax rate'); ?></button>
+                            <button class="button success js-dpdro-taxrate-save" type="button"><?php echo __('Save tax rate'); ?></button>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6"></td>
+                    <td>
+                        <button class="button primary js-dpdro-taxrate-add" type="button"><?php echo __('Add new tax rate'); ?></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="7">
+                        <p class="dpdro-info">
+                            <span><?php echo __('* Instructions'); ?></span>
+                            <?php echo __('1. Service can\'t have condition based on "price" and "weight" simultaneous.'); ?>
+                            <br>
+                            <?php echo __('2. Tax rates must have different conditions.'); ?>
+                        </p>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    <?php else : ?>
+        <!-- ================================================================================== -->
+        <!-- MESSAGE -->
+        <p class="dpdro-message">
+            <?php echo __('In order for tax rates to work you must be connected!'); ?>
+        </p>
+    <?php endif; ?>
+</div>
+<script type="text/javascript">
+    require([
+        "prototype"
+    ], function() {
+        window.DPDRO_TaxRates_Save = '<?= $block->getUrl('dpd/taxrates/save') ?>';
+        window.DPDRO_TaxRates_Text = {
+            'basedOnPrice': '<?php echo __('Based on price'); ?>',
+            'basedOnWeight': '<?php echo __('Based on weight'); ?>',
+            'fixed': '<?php echo __('Fixed'); ?>',
+            'percentage': '<?php echo __('Percentage'); ?>',
+            'enabled': '<?php echo __('Enabled'); ?>',
+            'disabled': '<?php echo __('Disabled'); ?>',
+            'delete': '<?php echo __('Delete tax rate'); ?>',
+            'save': '<?php echo __('Save tax rate'); ?>',
+            'error': '<?php echo __('Oops, An error occured, please try again later!'); ?>',
+        };
+        window.DPDRO_TaxRates_Services = JSON.parse('<?php echo json_encode($data['services']); ?>');
+    });
+</script>

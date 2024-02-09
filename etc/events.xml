@@ -3,4 +3,7 @@
 	<event name="payment_method_is_active">
 		<observer name="dpdro_payment" instance="DpdRo\Shipping\Model\Observer" />
 	</event>
+	<event name="sales_order_save_after">
+		<observer name="dpdro_place_order_after" instance="DpdRo\Shipping\Observer\Orderplaceafter" />
+	</event>
 </config>
