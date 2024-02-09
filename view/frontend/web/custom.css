@@ -1,0 +1,341 @@
+.dpdro-confirmation {
+    position: relative;
+    display: block;
+    float: left;
+    width: calc(100% - 2px);
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #c90133;
+    border-radius: 0;
+    background-color: #fff;
+}
+
+.dpdro-confirmation h3 {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    background-color: #c90133;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+.dpdro-confirmation p {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    border-bottom: 1px solid #dddddd;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+.dpdro-confirmation ul {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    list-style-type: none;
+}
+
+.dpdro-confirmation ul li {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dpdro-confirmation ul li input {
+    position: absolute;
+    z-index: 9;
+    left: 7.5px;
+    top: 5px;
+    margin: 0;
+    padding: 0;
+    width: 12px;
+    height: 12px;
+}
+
+.dpdro-confirmation ul li input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.dpdro-confirmation ul li input:before,
+.dpdro-confirmation ul li input:after {
+    display: none !important;
+}
+
+.dpdro-confirmation ul li label {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 5px 10px 5px 25px;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+.dpdro-confirmation ul li label span {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dpdro-confirmation ul li label b {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #c90133;
+}
+
+.dpdro-confirmation ul li label select {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 5px 0 0;
+    padding: 5px 10px;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+@-webkit-keyframes DpdRo_Loader {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes DpdRo_Loader {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.dpdro-confirmation .dpdro-loader {
+    position: relative;
+    display: inline-block;
+    float: left;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.dpdro-confirmation .dpdro-loader b {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 5px;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.dpdro-confirmation .dpdro-loader b:after {
+    content: "";
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    border: 4px solid #000000;
+    border-top: 4px solid #c90133;
+    border-radius: 50%;
+    -webkit-animation: DpdRo_Loader 2s linear infinite;
+    animation: DpdRo_Loader 2s linear infinite;
+}
+
+.dpdro-hide {
+    display: none;
+}
+
+.payment-method.dpdro-payment-method {
+    height: auto;
+    clear: both;
+}
+
+.payment-group>.payment-method.dpdro-payment-method .payment-method-title {
+    padding: 10px !important;
+}
+
+.dpdro-payment-component {
+    position: relative;
+    display: block;
+    float: left;
+    width: calc(100% - 2px);
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #c90133;
+    border-radius: 0;
+    background-color: #fff;
+}
+
+.dpdro-payment-component h3 {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    color: #fff;
+    font-size: 14px;
+    background-color: #c90133;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+.dpdro-payment-component p {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+.dpdro-payment-component p b {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: #c90133;
+}
+
+.dpdro-payment-component .payment-method-title {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dpdro-payment-component .payment-method-title input {
+    position: absolute;
+    z-index: 9;
+    left: 17.5px;
+    top: 15px;
+    margin: 0;
+    padding: 0;
+    width: 12px;
+    height: 12px;
+}
+
+.dpdro-payment-component .payment-method-title input:before,
+.dpdro-payment-component .payment-method-title input:after {
+    display: none !important;
+}
+
+.dpdro-payment-component .payment-method-title input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.dpdro-payment-component .payment-method-title label {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 5px 10px 5px 25px;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-shadow: none;
+    font-family: sans-serif;
+}
+
+.dpdro-payment-component .payment-method-title label span {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dpdro-payment-component .payment-method-content {
+    position: relative;
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 0 15px 15px 0;
+    text-align: right;
+}
+
+.dpdro-payment-component .payment-method-content button {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    margin: 0;
+    padding: 10px;
+    color: #fff;
+    font-size: 13px;
+    background-color: #c90133;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+    border-radius: 0;
+}
+
+.dpdro-payment-component .payment-method-content button:focus,
+.dpdro-payment-component .payment-method-content button:hover {
+    background-color: #c90133;
+    border: none;
+    opacity: 0.8;
+    outline: none;
+}

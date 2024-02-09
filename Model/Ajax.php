@@ -1201,13 +1201,13 @@ class Ajax
 	public function DPD_SetSessionConfirmation($data, $type)
 	{
 		$obj = ObjectManager::getInstance();
-		$session = $obj->create('\DpdRo\Checkout\Controller\Api\Session');
+		$session = $obj->create('\DpdRo\Shipping\Controller\Api\Session');
 		return $session->setSession($data, $type);
 	}
 	public function DPD_GetSessionConfirmation($type)
 	{
 		$obj = ObjectManager::getInstance();
-		$session = $obj->create('\DpdRo\Checkout\Controller\Api\Session');
+		$session = $obj->create('\DpdRo\Shipping\Controller\Api\Session');
 		return $session->getSession($type);
 	}
 	// ========================================================================================
