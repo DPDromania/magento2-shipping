@@ -4,7 +4,6 @@
  * @package     DpdRo_Shipping
  * @copyright   Copyright (c) DPD Ro (https://www.dpd.com/ro/ro/)
  */
-
 namespace DpdRo\Shipping\Model;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -35,7 +34,7 @@ class Shipping extends AbstractCarrier implements CarrierInterface
     {
         $result = $this->_rateResultFactory->create();
         $obj = ObjectManager::getInstance();
-        $apiRequest = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
         if ($apiRequest->CheckConnection() != 'success') {
             return $result;
         }
