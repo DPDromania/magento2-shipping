@@ -10,7 +10,7 @@ class Observer implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $obj = ObjectManager::getInstance();
-        $apiRequest = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
         $apiSession = $obj->create('\DpdRo\Shipping\Controller\Api\Session');
         $apiServices = $apiRequest->Settings('services');
         $order = $observer->getEvent()->getOrder();

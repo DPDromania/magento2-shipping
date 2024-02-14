@@ -3,7 +3,7 @@
 define(
     [
         'Magento_Checkout/js/model/quote',
-        'DpdRo_CashOnDeliveryFee/js/model/resource-url-manager',
+        'DpdRo_Shipping/js/model/resource-url-manager',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/full-screen-loader',
         'mage/storage',

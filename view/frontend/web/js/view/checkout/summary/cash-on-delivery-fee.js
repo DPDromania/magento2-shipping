@@ -4,7 +4,7 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Catalog/js/price-utils',
         'Magento_Checkout/js/model/totals',
-        'DpdRo_CashOnDeliveryFee/js/action/set-payment-and-update-totals',
+        'DpdRo_Shipping/js/action/set-payment-and-update-totals',
         'mage/translate',
         'knockout'
     ],
@@ -12,7 +12,7 @@ define(
         "use strict";
         return Component.extend({
             defaults: {
-                template: 'DpdRo_CashOnDeliveryFee/cash-on-delivery-fee',
+                template: 'DpdRo_Shipping/cash-on-delivery-fee',
                 title: translate('DPD RO Plata ramburs'),
                 value: ko.observable(0.0),
                 shouldDisplay: ko.observable(false)

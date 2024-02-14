@@ -9,7 +9,7 @@ define(
 
         rendererList.push({
             type: 'dpdro_payment',
-            component: 'DpdRo_Checkou/payment'
+            component: 'DpdRo_Shipping/payment'
         });
 
         return component.extend({});

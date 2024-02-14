@@ -22,7 +22,7 @@ class Session extends Action
     public function __construct(Context $context, PageFactory $pageFactory, JsonFactory $resultJsonFactory, SessionManagerInterface $coreSession)
     {
         $obj = ObjectManager::getInstance();
-        $this->customAjax = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $this->customAjax = $obj->create('\DpdRo\Shipping\Model\Ajax');
         $this->resultPageFactory = $pageFactory;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->coreSession = $coreSession;

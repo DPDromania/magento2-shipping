@@ -64,7 +64,7 @@
                                                 <item name="totals" xsi:type="array">
                                                     <item name="children" xsi:type="array">
                                                         <item name="cash-on-delivery-fee" xsi:type="array">
-                                                            <item name="component"  xsi:type="string">DpdRo_CashOnDeliveryFee/js/view/checkout/summary/cash-on-delivery-fee</item>
+                                                            <item name="component"  xsi:type="string">DpdRo_Shipping/js/view/checkout/summary/cash-on-delivery-fee</item>
                                                             <item name="sortOrder" xsi:type="string">99</item>
                                                             <item name="config" xsi:type="array">
                                                                 <item name="title" xsi:type="string" translate="true">DPD RO Plata ramburs</item>

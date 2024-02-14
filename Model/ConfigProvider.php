@@ -10,7 +10,7 @@ class ConfigProvider implements ConfigProviderInterface
     public function getConfig()
     {
         $obj = ObjectManager::getInstance();
-        $apiRequest = $obj->create('\DpdRo\Admin\Model\Ajax');
+        $apiRequest = $obj->create('\DpdRo\Shipping\Model\Ajax');
         $apiSession = $obj->create('\DpdRo\Shipping\Controller\Api\Session');
         $store = $obj->create('\Magento\Store\Model\StoreManagerInterface');
         $obj = ObjectManager::getInstance();
