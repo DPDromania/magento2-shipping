@@ -1570,7 +1570,7 @@ class Ajax
 					'orderProducts'        => $orderProducts,
 					'orderPreview'		   => $orderPreview,
 					'orderSettings'        => $orderSettings,
-					'orderCourier'         => (in_array($shipmentData['shipmentID'], $courierRequestsIDS)) ? true : false,
+					'orderCourier'         => ($shipmentData && in_array($shipmentData['shipmentID'], $courierRequestsIDS)) ? true : false,
 					'address'              => $orderAddress,
 					'addressStatus'        => $orderAddressStatus,
 					'addressValidation'    => $orderAddressValidation,
