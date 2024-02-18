@@ -100,18 +100,23 @@ require(
                         parameters: data
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.error) {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(response.message);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    fail: function() {
                         $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(response.message);
-                    } else {
-                        location.reload();
-                    }
-                }).fail(function() {
-                    $('.js-dpdro-alert').addClass('danger');
-                    $('.js-dpdro-alert span').html(DPDRO_Settings_Text.error);
+                        $('.js-dpdro-alert span').html(DPDRO_Settings_Text.error);
+                    }                    
                 });
+
                 return false;
             });
             $(document).on('click', '.js-dpdro-alert-close', function(e) {
@@ -175,18 +180,24 @@ require(
                         parameters: data
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.error) {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(response.message);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    fail: function() {
                         $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(response.message);
-                    } else {
-                        location.reload();
+                        $('.js-dpdro-alert span').html(DPDRO_PaymentTax_Text.error);
                     }
-                }).fail(function() {
-                    $('.js-dpdro-alert').addClass('danger');
-                    $('.js-dpdro-alert span').html(DPDRO_PaymentTax_Text.error);
+
                 });
+
                 return false;
             });
 
@@ -237,18 +248,23 @@ require(
                             action: 'save'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        if (response.error) {
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            if (response.error) {
+                                $('.js-dpdro-alert').addClass('danger');
+                                $('.js-dpdro-alert span').html(response.message);
+                            } else {
+                                location.reload();
+                            }
+                        },
+
+                        fail: function() {
                             $('.js-dpdro-alert').addClass('danger');
-                            $('.js-dpdro-alert span').html(response.message);
-                        } else {
-                            location.reload();
+                            $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                         }
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                     });
+
                 } else {
                     if (code.val() == '') {
                         code.addClass('error');
@@ -282,17 +298,21 @@ require(
                             action: 'save'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        if (response.error) {
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            if (response.error) {
+                                $('.js-dpdro-alert').addClass('danger');
+                                $('.js-dpdro-alert span').html(response.message);
+                            } else {
+                                location.reload();
+                            }
+                        },
+
+                        fail: function() {
                             $('.js-dpdro-alert').addClass('danger');
-                            $('.js-dpdro-alert span').html(response.message);
-                        } else {
-                            location.reload();
+                            $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                         }
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                     });
                 } else {
                     if (code.val() == '') {
@@ -320,17 +340,21 @@ require(
                             action: 'delete'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        if (response.error) {
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            if (response.error) {
+                                $('.js-dpdro-alert').addClass('danger');
+                                $('.js-dpdro-alert span').html(response.message);
+                            } else {
+                                location.reload();
+                            }
+                        },
+
+                        fail: function() {
                             $('.js-dpdro-alert').addClass('danger');
-                            $('.js-dpdro-alert span').html(response.message);
-                        } else {
-                            location.reload();
+                            $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                         }
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                     });
                 }
                 return false;
@@ -350,17 +374,21 @@ require(
                             action: 'import'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        if (response.error) {
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            if (response.error) {
+                                $('.js-dpdro-alert').addClass('danger');
+                                $('.js-dpdro-alert span').html(response.message);
+                            } else {
+                                location.reload();
+                            }
+                        },
+
+                        fail: function() {
                             $('.js-dpdro-alert').addClass('danger');
-                            $('.js-dpdro-alert span').html(response.message);
-                        } else {
-                            location.reload();
+                            $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                         }
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_Regions_Text.error);
                     });
                 }
                 return false;
@@ -390,18 +418,23 @@ require(
                             action: 'delete'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        if (response.error) {
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            if (response.error) {
+                                $('.js-dpdro-alert').addClass('danger');
+                            } else {
+                                $('.js-dpdro-alert').addClass('success');
+                            }
+                            $('.js-dpdro-alert span').html(response.message);
+                        },
+
+                        fail: function() {
                             $('.js-dpdro-alert').addClass('danger');
-                        } else {
-                            $('.js-dpdro-alert').addClass('success');
+                            $('.js-dpdro-alert span').html(DPDRO_TaxRates_Text.error);
                         }
-                        $('.js-dpdro-alert span').html(response.message);
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_TaxRates_Text.error);
                     });
+                            
                 }
                 var taxrates = $('.js-dpdro-taxrates .js-dpdro-taxrate').length;
                 $(this).closest('.js-dpdro-taxrate').remove();
@@ -435,18 +468,23 @@ require(
                         action: 'save'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.error) {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(response.message);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    fail: function() {
                         $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(response.message);
-                    } else {
-                        location.reload();
+                        $('.js-dpdro-alert span').html(DPDRO_TaxRates_Text.error);
                     }
-                }).fail(function() {
-                    $('.js-dpdro-alert').addClass('danger');
-                    $('.js-dpdro-alert span').html(DPDRO_TaxRates_Text.error);
                 });
+
                 return false;
             });
 
@@ -497,30 +535,35 @@ require(
                         action: 'validated'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        shipment.find('.js-dpdro-loader').removeClass('active');
+                        if (response.error) {
+                            var alert = `
+                                <div class="dpdro-alert danger" role="alert">
+                                    <span>` + response.message + `</span>
+                                </div>
+                            `;
+                            alertMessage.prepend(alert);
+                        } else {
+                            shipment.find('.js-dpdro-alert').removeClass('danger').addClass('success').find('span').html(response.message);
+                            shipment.find('.js-dpdro-disabled').removeClass('active');
+                            shipment.find('.js-dpdro-order-address-validation-table').css('display', 'none');
+                        }
+                    },
+
+                    fail: function() {
+                        shipment.find('.js-dpdro-loader').removeClass('active');
                         var alert = `
                             <div class="dpdro-alert danger" role="alert">
-                                <span>` + response.message + `</span>
+                                <span>` + DPDRO_Orders_Text.error + `</span>
                             </div>
                         `;
                         alertMessage.prepend(alert);
-                    } else {
-                        shipment.find('.js-dpdro-alert').removeClass('danger').addClass('success').find('span').html(response.message);
-                        shipment.find('.js-dpdro-disabled').removeClass('active');
-                        shipment.find('.js-dpdro-order-address-validation-table').css('display', 'none');
                     }
-                }).fail(function() {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    var alert = `
-                        <div class="dpdro-alert danger" role="alert">
-                            <span>` + DPDRO_Orders_Text.error + `</span>
-                        </div>
-                    `;
-                    alertMessage.prepend(alert);
                 });
+
                 return false;
             });
             $(document).on('click', '.js-dpdro-order-validation-skip', function(e) {
@@ -541,33 +584,39 @@ require(
                         action: 'skip'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        shipment.find('.js-dpdro-loader').removeClass('active');
+                        if (response.error) {
+                            var alert = `
+                                <div class="dpdro-alert danger" role="alert">
+                                    <span>` + response.message + `</span>
+                                </div>
+                            `;
+                            alertMessage.prepend(alert);
+                        } else {
+                            shipment.find('.js-dpdro-alert').css('display', 'none');
+                            shipment.find('.js-dpdro-disabled').removeClass('active');
+                            shipment.find('.js-dpdro-order-validation-skip').css('display', 'none');
+                            shipment.find('.js-dpdro-order-validation-normalize').css('display', 'inline-block');
+                            shipment.find('.js-dpdro-order-address-validation-table-head').css('display', 'none');
+                            shipment.find('.js-dpdro-order-address-validation-table-body').css('display', 'none');
+                        }
+                    },
+
+                    fail: function() {
+                        shipment.find('.js-dpdro-loader').removeClass('active');
                         var alert = `
                             <div class="dpdro-alert danger" role="alert">
-                                <span>` + response.message + `</span>
+                                <span>` + DPDRO_Orders_Text.error + `</span>
                             </div>
                         `;
                         alertMessage.prepend(alert);
-                    } else {
-                        shipment.find('.js-dpdro-alert').css('display', 'none');
-                        shipment.find('.js-dpdro-disabled').removeClass('active');
-                        shipment.find('.js-dpdro-order-validation-skip').css('display', 'none');
-                        shipment.find('.js-dpdro-order-validation-normalize').css('display', 'inline-block');
-                        shipment.find('.js-dpdro-order-address-validation-table-head').css('display', 'none');
-                        shipment.find('.js-dpdro-order-address-validation-table-body').css('display', 'none');
                     }
-                }).fail(function() {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    var alert = `
-                        <div class="dpdro-alert danger" role="alert">
-                            <span>` + DPDRO_Orders_Text.error + `</span>
-                        </div>
-                    `;
-                    alertMessage.prepend(alert);
+                    
                 });
+
                 return false;
             });
             $(document).on('click', '.js-dpdro-order-validation-normalize', function(e) {
@@ -588,33 +637,38 @@ require(
                         action: 'normalize'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        shipment.find('.js-dpdro-loader').removeClass('active');
+                        if (response.error) {
+                            var alert = `
+                                <div class="dpdro-alert danger" role="alert">
+                                    <span>` + response.message + `</span>
+                                </div>
+                            `;
+                            alertMessage.prepend(alert);
+                        } else {
+                            shipment.find('.js-dpdro-alert').css('display', 'inline-block');
+                            shipment.find('.js-dpdro-disabled').addClass('active');
+                            shipment.find('.js-dpdro-order-validation-skip').css('display', 'inline-block');
+                            shipment.find('.js-dpdro-order-validation-normalize').css('display', 'none');
+                            shipment.find('.js-dpdro-order-address-validation-table-head').css('display', 'table-row');
+                            shipment.find('.js-dpdro-order-address-validation-table-body').css('display', 'table-row');
+                        }
+                    },
+
+                    fail: function() {
+                        shipment.find('.js-dpdro-loader').removeClass('active');
                         var alert = `
                             <div class="dpdro-alert danger" role="alert">
-                                <span>` + response.message + `</span>
+                                <span>` + DPDRO_Orders_Text.error + `</span>
                             </div>
                         `;
                         alertMessage.prepend(alert);
-                    } else {
-                        shipment.find('.js-dpdro-alert').css('display', 'inline-block');
-                        shipment.find('.js-dpdro-disabled').addClass('active');
-                        shipment.find('.js-dpdro-order-validation-skip').css('display', 'inline-block');
-                        shipment.find('.js-dpdro-order-validation-normalize').css('display', 'none');
-                        shipment.find('.js-dpdro-order-address-validation-table-head').css('display', 'table-row');
-                        shipment.find('.js-dpdro-order-address-validation-table-body').css('display', 'table-row');
                     }
-                }).fail(function() {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    var alert = `
-                        <div class="dpdro-alert danger" role="alert">
-                            <span>` + DPDRO_Orders_Text.error + `</span>
-                        </div>
-                    `;
-                    alertMessage.prepend(alert);
                 });
+
                 return false;
             });
 
@@ -637,16 +691,20 @@ require(
                             action: 'search'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        var html = '';
-                        $.each(response, function(key, value) {
-                            html += '<button type="button" data-id="' + value['id'] + '" data-type="' + value['type'] + '" data-name="' + value['name'] + '">' + value['text'] + '</button>';
-                        });
-                        drowpdown.html(html);
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            var html = '';
+                            $.each(response, function(key, value) {
+                                html += '<button type="button" data-id="' + value['id'] + '" data-type="' + value['type'] + '" data-name="' + value['name'] + '">' + value['text'] + '</button>';
+                            });
+                            drowpdown.html(html);
+                        },
+
+                        fail: function() {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
+                        }
                     });
                 }
                 return false;
@@ -670,18 +728,23 @@ require(
                             action: 'search'
                         },
                         type: 'POST',
-                        dataType: 'json'
-                    }).success(function(response, textStatus, jqXHR) {
-                        var html = '';
-                        $.each(response, function(key, value) {
-                            html += '<button type="button" data-id="' + value['id'] + '" data-type="' + value['type'] + '" data-name="' + value['name'] + '">' + value['text'] + '</button>';
-                        });
-                        drowpdown.html(html);
-                    }).fail(function() {
-                        $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
+                        dataType: 'json',
+
+                        success: function(response, textStatus, jqXHR) {
+                            var html = '';
+                            $.each(response, function(key, value) {
+                                html += '<button type="button" data-id="' + value['id'] + '" data-type="' + value['type'] + '" data-name="' + value['name'] + '">' + value['text'] + '</button>';
+                            });
+                            drowpdown.html(html);
+                        },
+
+                        fail:function() {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
+                        }
                     });
                 }
+                
                 return false;
             });
             $(document).on('click', '.js-dpdro-order-street-search-container button', function(e) {
@@ -790,30 +853,36 @@ require(
                         action: 'create'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.error) {
+                            shipment.find('.js-dpdro-loader').removeClass('active');
+                            var alert = `
+                                <div class="dpdro-alert danger" role="alert">
+                                    <span>` + response.message + `</span>
+                                </div>
+                            `;
+                            alertMessage.prepend(alert);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    fail: function() {
                         shipment.find('.js-dpdro-loader').removeClass('active');
                         var alert = `
                             <div class="dpdro-alert danger" role="alert">
-                                <span>` + response.message + `</span>
+                                <span>` + DPDRO_Orders_Text.error + `</span>
                             </div>
                         `;
                         alertMessage.prepend(alert);
-                    } else {
-                        location.reload();
                     }
-                }).fail(function() {
-                    shipment.find('.js-dpdro-loader').removeClass('active');
-                    var alert = `
-                        <div class="dpdro-alert danger" role="alert">
-                            <span>` + DPDRO_Orders_Text.error + `</span>
-                        </div>
-                    `;
-                    alertMessage.prepend(alert);
                 });
+
                 return false;
             });
+
             $(document).on('click', '.js-dpdro-order-shipment-delete', function(e) {
                 e.preventDefault();
                 var action = DPDRO_Orders_Shipment + '?isAjax=true';
@@ -830,18 +899,23 @@ require(
                         action: 'delete'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.error) {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(response.message);
+                        } else {
+                            location.reload();
+                        }   
+                    },
+
+                    fail: function() {
                         $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(response.message);
-                    } else {
-                        location.reload();
+                        $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
                     }
-                }).fail(function() {
-                    $('.js-dpdro-alert').addClass('danger');
-                    $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
                 });
+
                 return false;
             });
 
@@ -862,20 +936,26 @@ require(
                         action: 'pickup'
                     },
                     type: 'POST',
-                    dataType: 'json'
-                }).success(function(response, textStatus, jqXHR) {
-                    if (response.error) {
+                    dataType: 'json',
+
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.error) {
+                            $('.js-dpdro-alert').addClass('danger');
+                            $('.js-dpdro-alert span').html(response.message);
+                        } else {
+                            location.reload();
+                        }
+                    },
+
+                    fail: function() {
                         $('.js-dpdro-alert').addClass('danger');
-                        $('.js-dpdro-alert span').html(response.message);
-                    } else {
-                        location.reload();
+                        $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
                     }
-                }).fail(function() {
-                    $('.js-dpdro-alert').addClass('danger');
-                    $('.js-dpdro-alert span').html(DPDRO_Orders_Text.error);
                 });
+
                 return false;
             });
+
             $(document).on('click', '.js-dpdro-order-request', function(e) {
                 e.preventDefault();
                 var action = DPDRO_Orders_Request + '?isAjax=true';
