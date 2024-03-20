@@ -22,5 +22,6 @@ Then execute the following commands:
 ```
 $ composer update
 $ bin/magento setup:upgrade
+$ bin/magento setup:di:compile
 $ bin/magento setup:static-content:deploy
 ```
