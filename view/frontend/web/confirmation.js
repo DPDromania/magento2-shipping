@@ -73,17 +73,27 @@ define(
                     <ul>
                         <li>
                             <input id="dpdro-shipping-method-address" type="radio" value="address" name="js-dpdro-shipping-method" ` + methodAddress + ` />
-                            <label for="dpdro-shipping-method-address">Ridica din dpdBox:
+                            <label for="dpdro-shipping-method-address">
                                 <span>` + translate('Adresa de livrare:') + `</span>
                                 <b>` + address + `</b>
                             </label>
                         </li>
                         <li>
-                            <input id="dpdro-shipping-method-pickup" type="radio" value="pickup" name="js-dpdro-shipping-method" ` + methodPickup + ` />
+                            <input id="dpdro-shipping-method-pickup" class="dpdro-shipping-method-pickup" type="radio" value="pickup" name="js-dpdro-shipping-method" ` + methodPickup + ` />
                             <label for="dpdro-shipping-method-pickup">
                                 <span>` + translate('Ridica din dpdBox:') + `</span>
-                                <iframe id="frameOfficeLocator" name="frameOfficeLocator" src="https://services.dpd.ro/office_locator_widget_v3/office_locator.php?lang=ro&showOfficesList=0&countryId=642` + (postcode ? `&postCode=` + postcode : ``) + `&officeType=ALL&selectOfficeButtonCaption=Select this office"></iframe>
+                                <iframe id="frameOfficeLocator" class="dpdro-shipping-method-office-locator" name="frameOfficeLocator" scrolling="no" src="https://services.dpd.ro/office_locator_widget_v3/office_locator.php?lang=ro&showOfficesList=0&countryId=642` + (postcode ? `&postCode=` + postcode : ``) + `&officeType=ALL&selectOfficeButtonCaption=Select this office"></iframe>
                             </label>
+                            <div>
+                                <div class="pickup-address"></div>
+                                <div class="new-pickup-address">
+                                    <button type="button" class="btn-new-pickup-address">
+                                        <span>` + translate('Change pick-up location') + `</span>
+                                    </button>
+                                </div>
+                                <input name="js-dpdro-shipping-method-pickup" type="hidden" value="" />
+                            </div>
+                            
                         </li>
                     </ul>
                 `;
@@ -234,7 +244,53 @@ define(
         }
 
         $(document).ready(function () {
+
+            $(document).on('message', '#shipping-new-address-form [name="country_id"]', function () {
+                var country = $(this).val();
+                var region = $('#shipping-new-address-form [name="region_id"]').val();
+                MAGENTO_ChangeCityNew(country, region);
+            });
+
             if (connected == 'success' && checkActive) {
+
+                window.addEventListener('message', function (e) {
+                    let returnedOfficeJsonObject = e.data;
+
+                    if (returnedOfficeJsonObject !== 'undefined'
+                        && returnedOfficeJsonObject.name
+                        && returnedOfficeJsonObject.address
+                    ) {
+                        let html = `<address>` +
+                            returnedOfficeJsonObject.name + '</br>' +
+                            returnedOfficeJsonObject.address.localAddressString + '</br>' +
+                            returnedOfficeJsonObject.address.postCode + ' ' + returnedOfficeJsonObject.address.siteName +
+                            `</address>`;
+
+                        $('.pickup-address').html(html);
+                        $('.pickup-address').show();
+                        $('.new-pickup-address').show();
+                        $('.dpdro-shipping-method-office-locator').hide();
+                    }
+
+                }, false);
+
+                $(document).on('click', '.dpdro-confirmation input', function (e) {
+                    let shippingMethod = $(".dpdro-confirmation input[type=radio][name=js-dpdro-shipping-method]:checked").val();
+
+                    if (shippingMethod === 'pickup') {
+                        $('.dpdro-shipping-method-office-locator').show();
+                    } else {
+                        $('.dpdro-shipping-method-office-locator').hide();
+                    }
+
+
+                });
+
+                $(document).on('click', '.btn-new-pickup-address', function () {
+                    $('.dpdro-shipping-method-office-locator').show();
+                    $('.pickup-address').hide();
+                    $('.new-pickup-address').hide();
+                });
 
                 // =============================================================================
                 // ADDRESS
@@ -502,6 +558,7 @@ define(
                     });
                 }
 
+
                 // =============================================================================
                 // CONFIRMATION
                 $(document).on('change', '[name="js-dpdro-shipping-method"]:checked', function () {
@@ -613,6 +670,9 @@ define(
                         });
                     }
                 });
+
+
+
 
             }
         });
