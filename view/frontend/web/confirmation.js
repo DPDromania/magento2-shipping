@@ -66,7 +66,6 @@ define(
             }
             var html = false;
             if (address && address != '' && options && options != '') {
-                console.log(postcode);
                 html = `
                     <h3>` + translate('DPD RO Shipping Method') + `</h3>
                     <p>` + translate('Confirma adresa introdusa:') + `</p>
@@ -88,7 +87,7 @@ define(
                                 <div class="pickup-address"></div>
                                 <div class="new-pickup-address">
                                     <button type="button" class="btn-new-pickup-address">
-                                        <span>` + translate('Change pick-up location') + `</span>
+                                        <span>` + $.mage.__('Change pick-up location') + `</span>
                                     </button>
                                 </div>
                                 <input name="js-dpdro-shipping-method-pickup" type="hidden" value="" />
@@ -266,6 +265,7 @@ define(
                             returnedOfficeJsonObject.address.postCode + ' ' + returnedOfficeJsonObject.address.siteName +
                             `</address>`;
 
+                        $('.dpdro-confirmation input[name="js-dpdro-shipping-method-pickup"]').val(returnedOfficeJsonObject.id);
                         $('.pickup-address').html(html);
                         $('.pickup-address').show();
                         $('.new-pickup-address').show();
