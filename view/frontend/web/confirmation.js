@@ -92,7 +92,6 @@ define(
                                 </div>
                                 <input name="js-dpdro-shipping-method-pickup" type="hidden" value="" />
                             </div>
-                            
                         </li>
                     </ul>
                 `;
@@ -270,6 +269,24 @@ define(
                         $('.pickup-address').show();
                         $('.new-pickup-address').show();
                         $('.dpdro-shipping-method-office-locator').hide();
+
+                        $.ajax({
+                            type: "POST",
+                            url: ajax,
+                            data: {
+                                'action': 'set',
+                                'type': 'confirmation',
+                                'parameters': {
+                                    'method': 'pickup',
+                                    'pickup': returnedOfficeJsonObject.id
+                                }
+                            },
+                            async: false,
+                            success: function (response) {
+                                MAGENTO_ReloadShipping();
+                            }
+                        });
+
                     }
 
                 }, false);
