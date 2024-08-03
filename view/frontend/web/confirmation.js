@@ -7,8 +7,18 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/shipping-rate-registry',
+        'mage/template',
     ],
-    function ($, uiRegistry, component, translate, quote, customer, rate) {
+    function (
+        $,
+        uiRegistry,
+        component,
+        translate,
+        quote,
+        customer,
+        rate,
+        mageTemplate
+    ) {
 
         'use strict';
 
@@ -20,10 +30,18 @@ define(
         const session = window.checkoutConfig.dpdro.session;
         const ajax = window.checkoutConfig.dpdro.ajax;
 
+        const locatorWidget = {
+            baseUrl: 'https://services.dpd.ro/office_locator_widget_v3/office_locator.php',
+            countryIds: {
+                RO: '642'
+            }
+        }
+
         window.dpdro = {
             method: 'address',
             pickup: '',
         };
+
         if (connected == 'success' && checkActive) {
             if (session) {
                 if (session['method']) {
@@ -35,8 +53,16 @@ define(
             }
         }
 
-        // =================================================================================
-        // CONFIRMATION HTML
+        /**
+         * Display address confirmation container
+         * 
+         * @param {String} address 
+         * @param {String} country 
+         * @param {String} city 
+         * @param {String} postcode 
+         * 
+         * @returns {String}
+         */
         function DPD_Confirmation(address, country, city, postcode) {
             var methodAddress = 'checked="checked"';
             var methodPickup = '';
@@ -64,24 +90,58 @@ define(
                     }
                 }
             }
-            var html = false;
+            var html = '';
+
             if (address && address != '' && options && options != '') {
-                html = `
-                    <h3>` + translate('DPD RO Shipping Method') + `</h3>
+                html = getAddressConfirmationHtml(address, postcode, country);
+            }
+
+            return html;
+        }
+
+
+        /**
+         * Retrieve address confirmation html
+         * 
+         * @param {String} address 
+         * @param {String} postcode 
+         * @param {String} city 
+         * 
+         * @returns {String}
+         */
+        function getAddressConfirmationHtml(address, postcode, country) {
+            let url = locatorWidget.baseUrl + '?showOfficesList=0&&officeType=ALL&selectOfficeButtonCaption=Select this office';
+
+            if (typeof window.LOCALE !== 'undefined') {
+                url = url + '&lang=' + window.LOCALE.split('-')[0];
+            }
+
+            if (
+                typeof country !== 'undefined'
+                && locatorWidget.countryIds.hasOwnProperty(country)
+            ) {
+                url = url + '&countryId=' + locatorWidget.countryIds[country];
+            }
+
+            if (typeof country !== 'undefined') {
+                url = url + '&postCode=' + postcode;
+            }
+
+            return `<h3>` + translate('DPD RO Shipping Method') + `</h3>
                     <p>` + translate('Confirma adresa introdusa:') + `</p>
                     <ul>
                         <li>
-                            <input id="dpdro-shipping-method-address" type="radio" value="address" name="js-dpdro-shipping-method" ` + methodAddress + ` />
+                            <input id="dpdro-shipping-method-address" type="radio" value="address" name="js-dpdro-shipping-method"/>
                             <label for="dpdro-shipping-method-address">
                                 <span>` + translate('Adresa de livrare:') + `</span>
                                 <b>` + address + `</b>
                             </label>
                         </li>
                         <li>
-                            <input id="dpdro-shipping-method-pickup" class="dpdro-shipping-method-pickup" type="radio" value="pickup" name="js-dpdro-shipping-method" ` + methodPickup + ` />
+                            <input id="dpdro-shipping-method-pickup" class="dpdro-shipping-method-pickup" type="radio" value="pickup" name="js-dpdro-shipping-method"/>
                             <label for="dpdro-shipping-method-pickup">
                                 <span>` + translate('Ridica din dpdBox:') + `</span>
-                                <iframe id="frameOfficeLocator" class="dpdro-shipping-method-office-locator" name="frameOfficeLocator" scrolling="no" src="https://services.dpd.ro/office_locator_widget_v3/office_locator.php?lang=ro&showOfficesList=0&countryId=642` + (postcode ? `&postCode=` + postcode : ``) + `&officeType=ALL&selectOfficeButtonCaption=Select this office"></iframe>
+                                <iframe id="frameOfficeLocator" class="dpdro-shipping-method-office-locator" name="frameOfficeLocator" scrolling="no" src="` + url + `"></iframe>
                             </label>
                             <div>
                                 <div class="pickup-address"></div>
@@ -95,8 +155,6 @@ define(
                         </li>
                     </ul>
                 `;
-            }
-            return html;
         }
 
         // =================================================================================
@@ -697,6 +755,7 @@ define(
         return component.extend({
             defaults: {
                 template: 'DpdRo_Shipping/confirmation',
+                addressConfirmationTemplate: 'DpdRo_Shipping/address_confirmation'
             },
             confirmation: function () {
                 // =================================================================================
