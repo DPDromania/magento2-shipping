@@ -7,7 +7,6 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/shipping-rate-registry',
-        'mage/template',
     ],
     function (
         $,
@@ -17,15 +16,12 @@ define(
         quote,
         customer,
         rate,
-        mageTemplate
     ) {
-
         'use strict';
 
         const connected = window.checkoutConfig.dpdro.connected;
         const checkActive = window.checkoutConfig.dpdro.active;
         const addresses = window.checkoutConfig.dpdro.addresses;
-        const offices = window.checkoutConfig.dpdro.offices;
         const officesGroup = window.checkoutConfig.dpdro.officesGroup;
         const session = window.checkoutConfig.dpdro.session;
         const ajax = window.checkoutConfig.dpdro.ajax;
@@ -33,7 +29,30 @@ define(
         const locatorWidget = {
             baseUrl: 'https://services.dpd.ro/office_locator_widget_v3/office_locator.php',
             countryIds: {
-                RO: '642'
+                RO: '642',
+                BG: '100',
+                AT: '40',
+                FR: '250',
+                HU: '348',
+                CZ: '203',
+                CR: '191',
+                GR: '300',
+                PL: '616',
+                SK: '703',
+                SI: '705',
+                DE: '276',
+                IT: '380',
+                BE: '56',
+                DK: '208',
+                SE: '752',
+                EE: '233',
+                LV: '428',
+                LT: '440',
+                LU: '442',
+                NL: '528',
+                ES: '724',
+                FI: '246',
+                PT: '620'
             }
         }
 
@@ -98,7 +117,6 @@ define(
 
             return html;
         }
-
 
         /**
          * Retrieve address confirmation html
