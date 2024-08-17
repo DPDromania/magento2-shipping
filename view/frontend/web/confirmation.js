@@ -77,41 +77,14 @@ define(
          * 
          * @param {String} address 
          * @param {String} country 
-         * @param {String} city 
          * @param {String} postcode 
          * 
          * @returns {String}
          */
-        function DPD_Confirmation(address, country, city, postcode) {
-            var methodAddress = 'checked="checked"';
-            var methodPickup = '';
-            if (window.dpdro && window.dpdro['method']) {
-                if (window.dpdro['method'] == 'pickup') {
-                    methodAddress = '';
-                    methodPickup = 'checked="checked"';
-                }
-            }
-            var options = '';
-            if (country && city) {
-                var cityName = city.split('(');
-                if (cityName && cityName.length > 0) {
-                    city = cityName[0].trim();
-                }
-                if (officesGroup[country] && officesGroup[country] != '') {
-                    if (officesGroup[country][city] && officesGroup[country][city] != '') {
-                        $.each(officesGroup[country][city], function (key, value) {
-                            if (window.dpdro && window.dpdro['pickup'] && window.dpdro['pickup'] == key) {
-                                options += '<option selected value="' + key + '">' + value + '</option>';
-                            } else {
-                                options += '<option value="' + key + '">' + value + '</option>';
-                            }
-                        });
-                    }
-                }
-            }
+        function DPD_Confirmation(address, country, postcode) {
             var html = '';
 
-            if (address && address != '' && options && options != '') {
+            if (address && address != '' && postcode && postcode != '') {
                 html = getAddressConfirmationHtml(address, postcode, country);
             }
 
@@ -393,15 +366,18 @@ define(
                         var region = $('#shipping-new-address-form [name="region_id"]').val();
                         MAGENTO_ChangeCityNew(country, region);
                     });
+
                     $(document).on('change', '#shipping-new-address-form [name="region_id"]', function () {
                         var country = $('#shipping-new-address-form [name="country_id"]').val();
                         var region = $(this).val();
                         MAGENTO_ChangeCityNew(country, region);
                     });
+
                     $(document).on('change', '#shipping-new-address-form .js-dpdro-shipping-city-select', function () {
                         $('#shipping-new-address-form [name="city"]').val($(this).find('option:selected').text()).trigger('change');
                         $('#shipping-new-address-form [name="postcode"]').val($(this).find('option:selected').attr('data-postcode')).trigger('change');
                     });
+
                     $(document).on('click', '.action-select-shipping-item, .action-save-address', function () {
                         var addressList = [];
                         var shippingAddress = quote.shippingAddress();
@@ -439,7 +415,7 @@ define(
                             }
                             if (country && (country == 'RO' || country == 'BG')) {
                                 var address = addressList.join(', ');
-                                var html = DPD_Confirmation(address, country, city, shippingAddress['postcode']);
+                                var html = DPD_Confirmation(address, country, shippingAddress['postcode']);
                                 if (html) {
                                     if ($('.js-dpdro-confirmation').length > 0) {
                                         $('.js-dpdro-confirmation').html(html);
@@ -506,6 +482,7 @@ define(
                             $('.js-dpdro-confirmation').remove();
                         }
                     });
+
                     $(document).on('change', '#shipping .js-dpdro-shipping-city-select', function () {
                         $('#shipping [name="city"]').val($(this).find('option:selected').text()).trigger('change');
                         $('#shipping [name="postcode"]').val($(this).find('option:selected').attr('data-postcode')).trigger('change');
@@ -567,7 +544,7 @@ define(
                             addressList.push(street);
                         }
                         address = addressList.join(', ');
-                        var html = DPD_Confirmation(address, countryID, city, shippingAddress['postcode']);
+                        var html = DPD_Confirmation(address, countryID, shippingAddress['postcode']);
                         if (html) {
                             if ($('.js-dpdro-confirmation').length > 0) {
                                 $('.js-dpdro-confirmation').html(html);
@@ -579,6 +556,62 @@ define(
                             $('.js-dpdro-confirmation').addClass('dpdro-hide');
                         }
                     });
+
+
+                    $(document).on('change', '#shipping [name="postcode"]', function () {
+                        var countryID = $('#shipping [name="country_id"] option:selected').val();
+                        var country = $('#shipping [name="country_id"] option:selected').text();
+                        var region = '';
+                        var city = $('#shipping [name="city"]').val();
+                        var postcode = $('#shipping [name="postcode"]').val();
+                        var street = $('#shipping [name="street[0]"]').val() + ' ' + $('#shipping [name="street[1]"]').val();
+
+                        if ($('#shipping [name="region_id"] option:selected').text() != '') {
+                            region = $('#shipping [name="region_id"] option:selected').text();
+                        }
+
+
+                        if (
+                            countryID
+                            && region.length > 0
+                            && street.length > 0
+                            && postcode.length > 0
+                        ) {
+                            MAGENTO_ReloadShipping();
+                        }
+
+                        var address = '';
+                        var addressList = [];
+                        if (country != '') {
+                            addressList.push(country);
+                        }
+                        if (region != '') {
+                            addressList.push(region);
+                        }
+                        if (city != '') {
+                            addressList.push(city);
+                        }
+                        if (street != '') {
+                            addressList.push(street);
+                        }
+
+                        address = addressList.join(', ');
+                        var html = DPD_Confirmation(address, countryID, postcode);
+
+
+                        if (html) {
+                            if ($('.js-dpdro-confirmation').length > 0) {
+                                $('.js-dpdro-confirmation').html(html);
+                            } else {
+                                $('<div class="dpdro-confirmation js-dpdro-confirmation">' + html + '</div>').insertBefore('#checkout-step-shipping_method');
+                            }
+                            $('.js-dpdro-confirmation').removeClass('dpdro-hide');
+                        } else {
+                            $('.js-dpdro-confirmation').addClass('dpdro-hide');
+                        }
+
+                    });
+
                     $(document).on('change', '#shipping [name="street[0]"]', function () {
                         var countryID = $('#shipping [name="country_id"] option:selected').val();
                         var country = $('#shipping [name="country_id"] option:selected').text();
@@ -637,7 +670,8 @@ define(
                             addressList.push(street);
                         }
                         address = addressList.join(', ');
-                        var html = DPD_Confirmation(address, countryID, city, shippingAddress['postcode']);
+
+                        var html = DPD_Confirmation(address, countryID, shippingAddress['postcode']);
                         if (html) {
                             if ($('.js-dpdro-confirmation').length > 0) {
                                 $('.js-dpdro-confirmation').html(html);
@@ -871,7 +905,7 @@ define(
                         }
                         address = addressList.join(', ');
                         if (shippingAddress['region_id'] != '' && shippingAddress['city'] != '') {
-                            var html = DPD_Confirmation(address, shippingAddress['country_id'], shippingAddress['city'], shippingAddress['postcode']);
+                            var html = DPD_Confirmation(address, shippingAddress['country_id'], shippingAddress['postcode']);
                             if (html) {
                                 $('.js-dpdro-confirmation').html(html);
                                 $('.js-dpdro-confirmation').removeClass('dpdro-hide');
