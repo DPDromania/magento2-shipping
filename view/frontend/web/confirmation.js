@@ -22,7 +22,6 @@ define(
         const connected = window.checkoutConfig.dpdro.connected;
         const checkActive = window.checkoutConfig.dpdro.active;
         const addresses = window.checkoutConfig.dpdro.addresses;
-        const officesGroup = window.checkoutConfig.dpdro.officesGroup;
         const session = window.checkoutConfig.dpdro.session;
         const ajax = window.checkoutConfig.dpdro.ajax;
 
@@ -192,7 +191,11 @@ define(
             rate.set(address.getKey(), null);
             rate.set(address.getCacheKey(), null);
             address.countryId = $('#shipping [name="country_id"]').val();
-            address.regionId = $('#shipping [name="region_id"]').val();
+
+            if ($('#shipping [name="region_id"]').val()) {
+                address.regionId = $('#shipping [name="region_id"]').val();
+            }
+
             address.region = $('#shipping [name="region_id"] option:selected').text();
             address.city = $('#shipping [name="city"]').val();
             address.postcode = $('#shipping [name="postcode"]').val();
