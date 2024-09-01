@@ -188,12 +188,14 @@ define(
         // RELOAD BY QUOTE
         function MAGENTO_ReloadShipping() {
             var address = quote.shippingAddress();
+            let regionId = $('#shipping [name="region_id"]').val();
+
             rate.set(address.getKey(), null);
             rate.set(address.getCacheKey(), null);
             address.countryId = $('#shipping [name="country_id"]').val();
 
-            if ($('#shipping [name="region_id"]').val()) {
-                address.regionId = $('#shipping [name="region_id"]').val();
+            if (regionId) {
+                address.regionId = parseInt(regionId);
             }
 
             address.region = $('#shipping [name="region_id"] option:selected').text();
