@@ -672,14 +672,14 @@ class Ajax
 	 * @param int|false $orderID
 	 * @param string|false $salesAddress
 	 * 
-	 * @return string
+	 * @return array<string, mixed>
 	 */
 	public function DPD_GetShippingTax(
 		$serviceID = false, 
 		$includeShipping = false, 
 		$orderID = false, 
 		$salesAddress = false
-	): string {
+	) {
 		$apiSettings = $this->Settings();
 		$parameters = [
 			'api' => 'calculate',

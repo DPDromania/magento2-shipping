@@ -6,7 +6,7 @@
     "magento/module-shipping": "100.4.*"
   },
   "type": "magento2-module",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "license": "OSL-3.0",
   "authors": [
     {
@@ -19,7 +19,11 @@
     "email": "api.support@dpd.ro",
     "issues": "https://www.dpd.com/ro/ro/"
   },
-  "keywords": ["dpd", "dpd parcelservice", "Magento2"],
+  "keywords": [
+    "dpd",
+    "dpd parcelservice",
+    "Magento2"
+  ],
   "autoload": {
     "files": [
       "registration.php"
