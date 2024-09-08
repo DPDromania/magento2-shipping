@@ -146,17 +146,24 @@ class Shipment extends Action
         }
         $orderTotal = $orderData->getGrandTotal();
         $shippingPrice = $orderData->getShippingAmount();
-        $serviceCodTax = $this->customAjax->DPD_GetShippingTax($shippingMethodCode, true, $data['orderID']);
+        $serviceCodTax = $this->customAjax->DPD_GetShippingTax(
+            $shippingMethodCode, 
+            (!in_array($shippingMethodCode, ['2303'])) ? true : false, 
+            $data['orderID']
+        );
+
         if (isset($serviceCodTax['calculations'][0]['error'])) {
             $response['message'] = $serviceCodTax['calculations'][0]['error']['message'];
             return $response;
         }
+
         $serviceCodTaxPrice = $serviceCodTax['calculations'][0]['price']['total'];
         $serviceCodTaxCurrency = $serviceCodTax['calculations'][0]['price']['currencyLocal'];
         $serviceCodTaxPriceConverted = (float) $this->customAjax->Magento_CurrencyConvert($serviceCodTaxPrice, $serviceCodTaxCurrency);
         $codPaymentDeclaredValue = 0;
         $paymentMethodCode = $orderData->getPayment()->getMethodInstance()->getCode();
         $orderCountryID = $orderData->getShippingAddress()->getCountryId();
+        
         if ($paymentMethodCode && $paymentMethodCode == 'dpdro_payment') {
             $codTax = 0;
             $codVat = 0;
@@ -202,9 +209,11 @@ class Shipment extends Action
         } else {
             $parameters['data']['payment']['courierServicePayer'] = 'SENDER';
         }
+
         if ($settings['declaredValue'] === 'yes') {
             $parameters['data']['service']['additionalServices']['declaredValue']['amount'] = (float) $codPaymentDeclaredValue;
         }
+
         $clientLastName = ($orderData->getShippingAddress()->getLastname() && $orderData->getShippingAddress()->getLastname() !== '') ? ' - ' . $orderData->getShippingAddress()->getLastname() : '';
         if ($data['shipmentPrivate'] == 'true') {
             $parameters['data']['recipient'] = [
@@ -226,82 +235,82 @@ class Shipment extends Action
                 'privatePerson' => true
             ];
         }
+
         $apiAddress = $this->customAjax->DPD_GetAddressNormalizedByOrderID($data['orderID']);
+
         if ($apiAddress && !empty($apiAddress)) {
-            if ($orderCountryID == 'RO' || $orderCountryID == 'BG') {
-                if ($apiAddress['method'] && $apiAddress['method'] === 'pickup') {
-                    $parameters['data']['recipient']['pickupOfficeId'] = (int) $apiAddress['officeID'];
+            if ($apiAddress['method'] && $apiAddress['method'] === 'pickup') {
+                $parameters['data']['recipient']['pickupOfficeId'] = (int) $apiAddress['officeID'];
+            } else {
+                $countryData = $this->customAjax->GetCountryByID($orderCountryID);
+                if ($countryData) {
+                    $parameters['data']['recipient']['address']['countryId'] = $countryData['id'];
+                    if (array_key_exists('postCodeFormats', $countryData) && !empty($countryData['postCodeFormats']) && is_array($countryData['postCodeFormats'])) {
+                        if ($orderData->getShippingAddress()->getData('postcode') && !empty($orderData->getShippingAddress()->getData('postcode'))) {
+                            $parameters['data']['recipient']['address']['postCode'] = trim($orderData->getShippingAddress()->getData('postcode'));
+                        }
+                    }
+                }
+                if (isset($apiAddress['addressCityID']) &&  !empty($apiAddress['addressCityID'])) {
+                    $parameters['data']['recipient']['address']['siteId'] = $apiAddress['addressCityID'];
                 } else {
-                    $countryData = $this->customAjax->GetCountryByID($orderCountryID);
-                    if ($countryData) {
-                        $parameters['data']['recipient']['address']['countryId'] = $countryData['id'];
-                        if (array_key_exists('postCodeFormats', $countryData) && !empty($countryData['postCodeFormats']) && is_array($countryData['postCodeFormats'])) {
-                            if ($orderData->getShippingAddress()->getData('postcode') && !empty($orderData->getShippingAddress()->getData('postcode'))) {
-                                $parameters['data']['recipient']['address']['postCode'] = trim($orderData->getShippingAddress()->getData('postcode'));
-                            }
-                        }
+                    if (isset($apiAddress['addressCityName']) &&  !empty($apiAddress['addressCityName'])) {
+                        $parameters['data']['recipient']['address']['siteName'] = $this->customAjax->ReplaceDiacritics($apiAddress['addressCityName']);
                     }
-                    if (isset($apiAddress['addressCityID']) &&  !empty($apiAddress['addressCityID'])) {
-                        $parameters['data']['recipient']['address']['siteId'] = $apiAddress['addressCityID'];
-                    } else {
-                        if (isset($apiAddress['addressCityName']) &&  !empty($apiAddress['addressCityName'])) {
-                            $parameters['data']['recipient']['address']['siteName'] = $this->customAjax->ReplaceDiacritics($apiAddress['addressCityName']);
-                        }
+                }
+                if ($apiAddress['status'] && !empty($apiAddress['status']) && $apiAddress['status'] == 'skip') {
+                    $parameters['data']['recipient']['address']['addressLine1'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
+                    $parameters['data']['recipient']['address']['streetName'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
+                    if (strlen($parameters['data']['recipient']['address']['addressLine1']) > 50) {
+                        $parameters['data']['recipient']['address']['addressLine1'] = substr($parameters['data']['recipient']['address']['addressLine1'], 0, 50);
                     }
-                    if ($apiAddress['status'] && !empty($apiAddress['status']) && $apiAddress['status'] == 'skip') {
-                        $parameters['data']['recipient']['address']['addressLine1'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
+                    if (strlen($parameters['data']['recipient']['address']['streetName']) > 50) {
+                        $parameters['data']['recipient']['address']['streetName'] = substr($parameters['data']['recipient']['address']['streetName'], 0, 50);
+                    }
+                    $parameters['data']['recipient']['address']['streetNo'] = (int) strpbrk($orderData->getShippingAddress()->getData('street'), '0123456789');
+                    if (empty($parameters['data']['recipient']['address']['streetNo'])) {
+                        $parameters['data']['recipient']['address']['streetNo'] = 0;
+                    }
+                } else {
+                    if (isset($data['shipmentValidation']) && !empty($data['shipmentValidation'])) {
                         $parameters['data']['recipient']['address']['streetName'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
-                        if (strlen($parameters['data']['recipient']['address']['addressLine1']) > 50) {
-                            $parameters['data']['recipient']['address']['addressLine1'] = substr($parameters['data']['recipient']['address']['addressLine1'], 0, 50);
+                        if (isset($data['shipmentValidation']['streetName']) &&  !empty($data['shipmentValidation']['streetName'])) {
+                            $parameters['data']['recipient']['address']['streetName'] = $this->customAjax->ReplaceDiacritics($data['shipmentValidation']['streetName']);
                         }
                         if (strlen($parameters['data']['recipient']['address']['streetName']) > 50) {
                             $parameters['data']['recipient']['address']['streetName'] = substr($parameters['data']['recipient']['address']['streetName'], 0, 50);
                         }
-                        $parameters['data']['recipient']['address']['streetNo'] = (int) strpbrk($orderData->getShippingAddress()->getData('street'), '0123456789');
-                        if (empty($parameters['data']['recipient']['address']['streetNo'])) {
-                            $parameters['data']['recipient']['address']['streetNo'] = 0;
+                        if (isset($data['shipmentValidation']['streetType']) &&  !empty($data['shipmentValidation']['streetType'])) {
+                            $parameters['data']['recipient']['address']['streetType'] = $data['shipmentValidation']['streetType'];
+                        }
+                        $parameters['data']['recipient']['address']['streetNo'] = 0;
+                        if (isset($data['shipmentValidation']['number']) &&  !empty($data['shipmentValidation']['number'])) {
+                            $parameters['data']['recipient']['address']['streetNo'] = (int) $data['shipmentValidation']['number'];
                         }
                     } else {
-                        if (isset($data['shipmentValidation']) && !empty($data['shipmentValidation'])) {
-                            $parameters['data']['recipient']['address']['streetName'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
-                            if (isset($data['shipmentValidation']['streetName']) &&  !empty($data['shipmentValidation']['streetName'])) {
-                                $parameters['data']['recipient']['address']['streetName'] = $this->customAjax->ReplaceDiacritics($data['shipmentValidation']['streetName']);
-                            }
-                            if (strlen($parameters['data']['recipient']['address']['streetName']) > 50) {
-                                $parameters['data']['recipient']['address']['streetName'] = substr($parameters['data']['recipient']['address']['streetName'], 0, 50);
-                            }
-                            if (isset($data['shipmentValidation']['streetType']) &&  !empty($data['shipmentValidation']['streetType'])) {
-                                $parameters['data']['recipient']['address']['streetType'] = $data['shipmentValidation']['streetType'];
-                            }
-                            $parameters['data']['recipient']['address']['streetNo'] = 0;
-                            if (isset($data['shipmentValidation']['number']) &&  !empty($data['shipmentValidation']['number'])) {
-                                $parameters['data']['recipient']['address']['streetNo'] = (int) $data['shipmentValidation']['number'];
-                            }
+                        if (isset($apiAddress['addressStreetID']) &&  !empty($apiAddress['addressStreetID'])) {
+                            $parameters['data']['recipient']['address']['streetId'] = $apiAddress['addressStreetID'];
                         } else {
-                            if (isset($apiAddress['addressStreetID']) &&  !empty($apiAddress['addressStreetID'])) {
-                                $parameters['data']['recipient']['address']['streetId'] = $apiAddress['addressStreetID'];
-                            } else {
-                                if (isset($apiAddress['addressStreetType']) &&  !empty($apiAddress['addressStreetType'])) {
-                                    $parameters['data']['recipient']['address']['streetType'] = $apiAddress['addressStreetType'];
-                                }
-                            }
-                            $parameters['data']['recipient']['address']['streetNo'] = 0;
-                            if (isset($apiAddress['addressNumber']) &&  !empty($apiAddress['addressNumber'])) {
-                                $parameters['data']['recipient']['address']['streetNo'] = (int) $apiAddress['addressNumber'];
+                            if (isset($apiAddress['addressStreetType']) &&  !empty($apiAddress['addressStreetType'])) {
+                                $parameters['data']['recipient']['address']['streetType'] = $apiAddress['addressStreetType'];
                             }
                         }
-                        if (isset($apiAddress['addressBlock']) &&  !empty($apiAddress['addressBlock'])) {
-                            $parameters['data']['recipient']['address']['blockNo'] = $apiAddress['addressBlock'];
+                        $parameters['data']['recipient']['address']['streetNo'] = 0;
+                        if (isset($apiAddress['addressNumber']) &&  !empty($apiAddress['addressNumber'])) {
+                            $parameters['data']['recipient']['address']['streetNo'] = (int) $apiAddress['addressNumber'];
                         }
-                        if (isset($apiAddress['addressApartment']) &&  !empty($apiAddress['addressApartment'])) {
-                            $parameters['data']['recipient']['address']['apartmentNo'] = $apiAddress['addressApartment'];
-                        }
-                        if (isset($apiAddress['addressScale']) &&  !empty($apiAddress['addressScale'])) {
-                            $parameters['data']['recipient']['address']['entranceNo'] = $apiAddress['addressScale'];
-                        }
-                        if (isset($apiAddress['addressFloor']) &&  !empty($apiAddress['addressFloor'])) {
-                            $parameters['data']['recipient']['address']['floorNo'] = $apiAddress['addressFloor'];
-                        }
+                    }
+                    if (isset($apiAddress['addressBlock']) &&  !empty($apiAddress['addressBlock'])) {
+                        $parameters['data']['recipient']['address']['blockNo'] = $apiAddress['addressBlock'];
+                    }
+                    if (isset($apiAddress['addressApartment']) &&  !empty($apiAddress['addressApartment'])) {
+                        $parameters['data']['recipient']['address']['apartmentNo'] = $apiAddress['addressApartment'];
+                    }
+                    if (isset($apiAddress['addressScale']) &&  !empty($apiAddress['addressScale'])) {
+                        $parameters['data']['recipient']['address']['entranceNo'] = $apiAddress['addressScale'];
+                    }
+                    if (isset($apiAddress['addressFloor']) &&  !empty($apiAddress['addressFloor'])) {
+                        $parameters['data']['recipient']['address']['floorNo'] = $apiAddress['addressFloor'];
                     }
                 }
             }
@@ -346,6 +355,7 @@ class Shipment extends Action
                 $parameters['data']['recipient']['address']['postCode'] = trim($orderData->getShippingAddress()->getData('postcode'));
             }
         }
+        
         $requestAddShipment = $this->customAjax->ApiRequest($parameters);
         if (!is_array($requestAddShipment) || empty($requestAddShipment) || array_key_exists('error', $requestAddShipment)) {
             $response['error'] = true;

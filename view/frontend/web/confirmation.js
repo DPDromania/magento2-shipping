@@ -8,22 +8,58 @@ define(
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/shipping-rate-registry',
     ],
-    function($, uiRegistry, component, translate, quote, customer, rate) {
-
+    function (
+        $,
+        uiRegistry,
+        component,
+        translate,
+        quote,
+        customer,
+        rate,
+    ) {
         'use strict';
 
         const connected = window.checkoutConfig.dpdro.connected;
         const checkActive = window.checkoutConfig.dpdro.active;
         const addresses = window.checkoutConfig.dpdro.addresses;
-        const offices = window.checkoutConfig.dpdro.offices;
-        const officesGroup = window.checkoutConfig.dpdro.officesGroup;
         const session = window.checkoutConfig.dpdro.session;
         const ajax = window.checkoutConfig.dpdro.ajax;
+
+        const locatorWidget = {
+            baseUrl: 'https://services.dpd.ro/office_locator_widget_v3/office_locator.php',
+            countryIds: {
+                RO: '642',
+                BG: '100',
+                AT: '40',
+                FR: '250',
+                HU: '348',
+                CZ: '203',
+                CR: '191',
+                GR: '300',
+                PL: '616',
+                SK: '703',
+                SI: '705',
+                DE: '276',
+                IT: '380',
+                BE: '56',
+                DK: '208',
+                SE: '752',
+                EE: '233',
+                LV: '428',
+                LT: '440',
+                LU: '442',
+                NL: '528',
+                ES: '724',
+                FI: '246',
+                PT: '620'
+            }
+        }
 
         window.dpdro = {
             method: 'address',
             pickup: '',
         };
+
         if (connected == 'success' && checkActive) {
             if (session) {
                 if (session['method']) {
@@ -35,62 +71,80 @@ define(
             }
         }
 
-        // =================================================================================
-        // CONFIRMATION HTML
-        function DPD_Confirmation(address, country, city) {
-            var methodAddress = 'checked="checked"';
-            var methodPickup = '';
-            if (window.dpdro && window.dpdro['method']) {
-                if (window.dpdro['method'] == 'pickup') {
-                    methodAddress = '';
-                    methodPickup = 'checked="checked"';
-                }
+        /**
+         * Display address confirmation container
+         * 
+         * @param {String} address 
+         * @param {String} country 
+         * @param {String} postcode 
+         * 
+         * @returns {String}
+         */
+        function DPD_Confirmation(address, country, postcode) {
+            var html = '';
+
+            if (address && address != '' && postcode && postcode != '') {
+                html = getAddressConfirmationHtml(address, postcode, country);
             }
-            var options = '';
-            if (country && city) {
-                var cityName = city.split('(');
-                if (cityName && cityName.length > 0) {
-                    city = cityName[0].trim();
-                }
-                if (officesGroup[country] && officesGroup[country] != '') {
-                    if (officesGroup[country][city] && officesGroup[country][city] != '') {
-                        $.each(officesGroup[country][city], function(key, value) {
-                            if (window.dpdro && window.dpdro['pickup'] && window.dpdro['pickup'] == key) {
-                                options += '<option selected value="' + key + '">' + value + '</option>';
-                            } else {
-                                options += '<option value="' + key + '">' + value + '</option>';
-                            }
-                        });
-                    }
-                }
+
+            return html;
+        }
+
+        /**
+         * Retrieve address confirmation html
+         * 
+         * @param {String} address 
+         * @param {String} postcode 
+         * @param {String} city 
+         * 
+         * @returns {String}
+         */
+        function getAddressConfirmationHtml(address, postcode, country) {
+            let url = locatorWidget.baseUrl + '?showOfficesList=0&&officeType=ALL&selectOfficeButtonCaption=Select this office';
+
+            if (typeof window.LOCALE !== 'undefined') {
+                url = url + '&lang=' + window.LOCALE.split('-')[0];
             }
-            var html = false;
-            if (address && address != '' && options && options != '') {
-                html = `
-                    <h3>` + translate('DPD RO Shipping Method') + `</h3>
+
+            if (
+                typeof country !== 'undefined'
+                && locatorWidget.countryIds.hasOwnProperty(country)
+            ) {
+                url = url + '&countryId=' + locatorWidget.countryIds[country];
+            }
+
+            if (typeof country !== 'undefined') {
+                url = url + '&postCode=' + postcode;
+            }
+
+            return `<h3>` + translate('DPD RO Shipping Method') + `</h3>
                     <p>` + translate('Confirma adresa introdusa:') + `</p>
                     <ul>
                         <li>
-                            <input id="dpdro-shipping-method-address" type="radio" value="address" name="js-dpdro-shipping-method" ` + methodAddress + ` />
+                            <input id="dpdro-shipping-method-address" type="radio" value="address" name="js-dpdro-shipping-method"/>
                             <label for="dpdro-shipping-method-address">
                                 <span>` + translate('Adresa de livrare:') + `</span>
                                 <b>` + address + `</b>
                             </label>
                         </li>
                         <li>
-                            <input id="dpdro-shipping-method-pickup" type="radio" value="pickup" name="js-dpdro-shipping-method" ` + methodPickup + ` />
+                            <input id="dpdro-shipping-method-pickup" class="dpdro-shipping-method-pickup" type="radio" value="pickup" name="js-dpdro-shipping-method"/>
                             <label for="dpdro-shipping-method-pickup">
                                 <span>` + translate('Ridica din dpdBox:') + `</span>
-                                <select name="js-dpdro-shipping-method-pickup">
-                                    <option value="">` + translate(' --- Selecteaza dpdBox --- ') + `</option>
-                                    ` + options + `
-                                </select>
+                                <iframe id="frameOfficeLocator" class="dpdro-shipping-method-office-locator" name="frameOfficeLocator" scrolling="no" src="` + url + `"></iframe>
                             </label>
+                            <div>
+                                <div class="pickup-address"></div>
+                                <div class="new-pickup-address">
+                                    <button type="button" class="btn-new-pickup-address">
+                                        <span>` + $.mage.__('Change pick-up location') + `</span>
+                                    </button>
+                                </div>
+                                <input name="js-dpdro-shipping-method-pickup" type="hidden" value="" />
+                            </div>
                         </li>
                     </ul>
                 `;
-            }
-            return html;
         }
 
         // =================================================================================
@@ -108,7 +162,7 @@ define(
                             if (addresses[countryKey][regionKey]['streets'] && addresses[countryKey][regionKey]['streets'] != '') {
                                 if (city) {
                                     var cityData = [];
-                                    $.each(addresses[countryKey][regionKey]['streets'], function(key, value) {
+                                    $.each(addresses[countryKey][regionKey]['streets'], function (key, value) {
                                         if (value['name'] == city) {
                                             cityData = value;
                                         }
@@ -134,10 +188,16 @@ define(
         // RELOAD BY QUOTE
         function MAGENTO_ReloadShipping() {
             var address = quote.shippingAddress();
+            let regionId = $('#shipping [name="region_id"]').val();
+
             rate.set(address.getKey(), null);
             rate.set(address.getCacheKey(), null);
             address.countryId = $('#shipping [name="country_id"]').val();
-            address.regionId = $('#shipping [name="region_id"]').val();
+
+            if (regionId) {
+                address.regionId = parseInt(regionId);
+            }
+
             address.region = $('#shipping [name="region_id"] option:selected').text();
             address.city = $('#shipping [name="city"]').val();
             address.postcode = $('#shipping [name="postcode"]').val();
@@ -235,27 +295,95 @@ define(
             }
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
+
+            $(document).on('message', '#shipping-new-address-form [name="country_id"]', function () {
+                var country = $(this).val();
+                var region = $('#shipping-new-address-form [name="region_id"]').val();
+                MAGENTO_ChangeCityNew(country, region);
+            });
+
             if (connected == 'success' && checkActive) {
+
+                window.addEventListener('message', function (e) {
+                    let returnedOfficeJsonObject = e.data;
+
+                    if (returnedOfficeJsonObject !== 'undefined'
+                        && returnedOfficeJsonObject.name
+                        && returnedOfficeJsonObject.address
+                    ) {
+                        let html = `<address>` +
+                            returnedOfficeJsonObject.name + '</br>' +
+                            returnedOfficeJsonObject.address.localAddressString + '</br>' +
+                            returnedOfficeJsonObject.address.postCode + ' ' + returnedOfficeJsonObject.address.siteName +
+                            `</address>`;
+
+                        $('.dpdro-confirmation input[name="js-dpdro-shipping-method-pickup"]').val(returnedOfficeJsonObject.id);
+                        $('.pickup-address').html(html);
+                        $('.pickup-address').show();
+                        $('.new-pickup-address').show();
+                        $('.dpdro-shipping-method-office-locator').hide();
+
+                        $.ajax({
+                            type: "POST",
+                            url: ajax,
+                            data: {
+                                'action': 'set',
+                                'type': 'confirmation',
+                                'parameters': {
+                                    'method': 'pickup',
+                                    'pickup': returnedOfficeJsonObject.id
+                                }
+                            },
+                            async: false,
+                            success: function (response) {
+                                MAGENTO_ReloadShipping();
+                            }
+                        });
+
+                    }
+
+                }, false);
+
+                $(document).on('click', '.dpdro-confirmation input', function (e) {
+                    let shippingMethod = $(".dpdro-confirmation input[type=radio][name=js-dpdro-shipping-method]:checked").val();
+
+                    if (shippingMethod === 'pickup') {
+                        $('.dpdro-shipping-method-office-locator').show();
+                    } else {
+                        $('.dpdro-shipping-method-office-locator').hide();
+                    }
+
+
+                });
+
+                $(document).on('click', '.btn-new-pickup-address', function () {
+                    $('.dpdro-shipping-method-office-locator').show();
+                    $('.pickup-address').hide();
+                    $('.new-pickup-address').hide();
+                });
 
                 // =============================================================================
                 // ADDRESS
                 if (customer.isLoggedIn()) {
-                    $(document).on('change', '#shipping-new-address-form [name="country_id"]', function() {
+                    $(document).on('change', '#shipping-new-address-form [name="country_id"]', function () {
                         var country = $(this).val();
                         var region = $('#shipping-new-address-form [name="region_id"]').val();
                         MAGENTO_ChangeCityNew(country, region);
                     });
-                    $(document).on('change', '#shipping-new-address-form [name="region_id"]', function() {
+
+                    $(document).on('change', '#shipping-new-address-form [name="region_id"]', function () {
                         var country = $('#shipping-new-address-form [name="country_id"]').val();
                         var region = $(this).val();
                         MAGENTO_ChangeCityNew(country, region);
                     });
-                    $(document).on('change', '#shipping-new-address-form .js-dpdro-shipping-city-select', function() {
+
+                    $(document).on('change', '#shipping-new-address-form .js-dpdro-shipping-city-select', function () {
                         $('#shipping-new-address-form [name="city"]').val($(this).find('option:selected').text()).trigger('change');
                         $('#shipping-new-address-form [name="postcode"]').val($(this).find('option:selected').attr('data-postcode')).trigger('change');
                     });
-                    $(document).on('click', '.action-select-shipping-item, .action-save-address', function() {
+
+                    $(document).on('click', '.action-select-shipping-item, .action-save-address', function () {
                         var addressList = [];
                         var shippingAddress = quote.shippingAddress();
                         if (shippingAddress) {
@@ -280,7 +408,7 @@ define(
                                 var shippingAddressStreet = shippingAddress['street'];
                                 var shippingAddressStreetString = '';
                                 if (shippingAddressStreet && shippingAddressStreet.length > 0) {
-                                    shippingAddressStreet.forEach(function(item, index) {
+                                    shippingAddressStreet.forEach(function (item, index) {
                                         if (shippingAddressStreetString == '') {
                                             shippingAddressStreetString += item;
                                         } else {
@@ -292,7 +420,7 @@ define(
                             }
                             if (country && (country == 'RO' || country == 'BG')) {
                                 var address = addressList.join(', ');
-                                var html = DPD_Confirmation(address, country, city);
+                                var html = DPD_Confirmation(address, country, shippingAddress['postcode']);
                                 if (html) {
                                     if ($('.js-dpdro-confirmation').length > 0) {
                                         $('.js-dpdro-confirmation').html(html);
@@ -309,7 +437,7 @@ define(
                         }
                     });
                 } else {
-                    $(document).on('change', '#shipping [name="country_id"]', function() {
+                    $(document).on('change', '#shipping [name="country_id"]', function () {
                         var shippingAddress = uiRegistry.get('checkoutProvider').shippingAddress;
                         var country = $(this).val();
                         var city = $('#shipping [name="city"]').val();
@@ -334,7 +462,7 @@ define(
                             $('.js-dpdro-confirmation').remove();
                         }
                     });
-                    $(document).on('change', '#shipping [name="region_id"]', function() {
+                    $(document).on('change', '#shipping [name="region_id"]', function () {
                         var shippingAddress = uiRegistry.get('checkoutProvider').shippingAddress;
                         var country = $(this).val();
                         var city = $('#shipping [name="city"]').val();
@@ -359,7 +487,8 @@ define(
                             $('.js-dpdro-confirmation').remove();
                         }
                     });
-                    $(document).on('change', '#shipping .js-dpdro-shipping-city-select', function() {
+
+                    $(document).on('change', '#shipping .js-dpdro-shipping-city-select', function () {
                         $('#shipping [name="city"]').val($(this).find('option:selected').text()).trigger('change');
                         $('#shipping [name="postcode"]').val($(this).find('option:selected').attr('data-postcode')).trigger('change');
                         MAGENTO_ReloadShipping();
@@ -394,7 +523,7 @@ define(
                                 var shippingAddressStreet = shippingAddress['street'];
                                 var shippingAddressStreetString = '';
                                 if (shippingAddressStreet && shippingAddressStreet.length > 0) {
-                                    shippingAddressStreet.forEach(function(item, index) {
+                                    shippingAddressStreet.forEach(function (item, index) {
                                         if (shippingAddressStreetString == '') {
                                             shippingAddressStreetString += item;
                                         } else {
@@ -420,7 +549,7 @@ define(
                             addressList.push(street);
                         }
                         address = addressList.join(', ');
-                        var html = DPD_Confirmation(address, countryID, city);
+                        var html = DPD_Confirmation(address, countryID, shippingAddress['postcode']);
                         if (html) {
                             if ($('.js-dpdro-confirmation').length > 0) {
                                 $('.js-dpdro-confirmation').html(html);
@@ -432,7 +561,63 @@ define(
                             $('.js-dpdro-confirmation').addClass('dpdro-hide');
                         }
                     });
-                    $(document).on('change', '#shipping [name="street[0]"]', function() {
+
+
+                    $(document).on('change', '#shipping [name="postcode"]', function () {
+                        var countryID = $('#shipping [name="country_id"] option:selected').val();
+                        var country = $('#shipping [name="country_id"] option:selected').text();
+                        var region = '';
+                        var city = $('#shipping [name="city"]').val();
+                        var postcode = $('#shipping [name="postcode"]').val();
+                        var street = $('#shipping [name="street[0]"]').val() + ' ' + $('#shipping [name="street[1]"]').val();
+
+                        if ($('#shipping [name="region_id"] option:selected').text() != '') {
+                            region = $('#shipping [name="region_id"] option:selected').text();
+                        }
+
+
+                        if (
+                            countryID
+                            && region.length > 0
+                            && street.length > 0
+                            && postcode.length > 0
+                        ) {
+                            MAGENTO_ReloadShipping();
+                        }
+
+                        var address = '';
+                        var addressList = [];
+                        if (country != '') {
+                            addressList.push(country);
+                        }
+                        if (region != '') {
+                            addressList.push(region);
+                        }
+                        if (city != '') {
+                            addressList.push(city);
+                        }
+                        if (street != '') {
+                            addressList.push(street);
+                        }
+
+                        address = addressList.join(', ');
+                        var html = DPD_Confirmation(address, countryID, postcode);
+
+
+                        if (html) {
+                            if ($('.js-dpdro-confirmation').length > 0) {
+                                $('.js-dpdro-confirmation').html(html);
+                            } else {
+                                $('<div class="dpdro-confirmation js-dpdro-confirmation">' + html + '</div>').insertBefore('#checkout-step-shipping_method');
+                            }
+                            $('.js-dpdro-confirmation').removeClass('dpdro-hide');
+                        } else {
+                            $('.js-dpdro-confirmation').addClass('dpdro-hide');
+                        }
+
+                    });
+
+                    $(document).on('change', '#shipping [name="street[0]"]', function () {
                         var countryID = $('#shipping [name="country_id"] option:selected').val();
                         var country = $('#shipping [name="country_id"] option:selected').text();
                         var region = '';
@@ -464,7 +649,7 @@ define(
                                 var shippingAddressStreet = shippingAddress['street'];
                                 var shippingAddressStreetString = '';
                                 if (shippingAddressStreet && shippingAddressStreet.length > 0) {
-                                    shippingAddressStreet.forEach(function(item, index) {
+                                    shippingAddressStreet.forEach(function (item, index) {
                                         if (shippingAddressStreetString == '') {
                                             shippingAddressStreetString += item;
                                         } else {
@@ -490,7 +675,8 @@ define(
                             addressList.push(street);
                         }
                         address = addressList.join(', ');
-                        var html = DPD_Confirmation(address, countryID, city);
+
+                        var html = DPD_Confirmation(address, countryID, shippingAddress['postcode']);
                         if (html) {
                             if ($('.js-dpdro-confirmation').length > 0) {
                                 $('.js-dpdro-confirmation').html(html);
@@ -504,9 +690,10 @@ define(
                     });
                 }
 
+
                 // =============================================================================
                 // CONFIRMATION
-                $(document).on('change', '[name="js-dpdro-shipping-method"]:checked', function() {
+                $(document).on('change', '[name="js-dpdro-shipping-method"]:checked', function () {
                     var method = $(this).val();
                     var pickup = '';
                     if (method == 'pickup') {
@@ -528,14 +715,14 @@ define(
                             }
                         },
                         async: false,
-                        success: function(response) {
+                        success: function (response) {
                             window.dpdro['method'] = method;
                             window.dpdro['pickup'] = pickup;
                             MAGENTO_ReloadShipping();
                         }
                     });
                 });
-                $(document).on('change', '[name="js-dpdro-shipping-method-pickup"]', function() {
+                $(document).on('change', '[name="js-dpdro-shipping-method-pickup"]', function () {
                     var method = 'pickup';
                     var pickup = $(this).val();
                     if (pickup == '') {
@@ -557,7 +744,7 @@ define(
                             }
                         },
                         async: false,
-                        success: function(response) {
+                        success: function (response) {
                             window.dpdro['method'] = method;
                             window.dpdro['pickup'] = pickup;
                             MAGENTO_ReloadShipping();
@@ -567,7 +754,7 @@ define(
 
                 // =============================================================================
                 // SET / UNSET ADDRESS
-                $(document).on('click', '#shipping-method-buttons-container button', function() {
+                $(document).on('click', '#shipping-method-buttons-container button', function () {
                     if (customer.isLoggedIn()) {
                         var checkoutQuote = quote.shippingAddress();
                         var cityData = DPD_GetAddresses(checkoutQuote['countryId'], checkoutQuote['regionId'], false, checkoutQuote['city']);
@@ -583,7 +770,7 @@ define(
                                 }
                             },
                             async: false,
-                            success: function(response) {}
+                            success: function (response) { }
                         });
                     } else if ($('#shipping .js-dpdro-shipping-city-select').length > 0) {
                         var addressCityID = $('#shipping .js-dpdro-shipping-city-select option:selected').attr('data-id');
@@ -600,7 +787,7 @@ define(
                                 }
                             },
                             async: false,
-                            success: function(response) {}
+                            success: function (response) { }
                         });
                     } else {
                         $.ajax({
@@ -611,10 +798,13 @@ define(
                                 'type': 'address'
                             },
                             async: false,
-                            success: function(response) {}
+                            success: function (response) { }
                         });
                     }
                 });
+
+
+
 
             }
         });
@@ -622,8 +812,9 @@ define(
         return component.extend({
             defaults: {
                 template: 'DpdRo_Shipping/confirmation',
+                addressConfirmationTemplate: 'DpdRo_Shipping/address_confirmation'
             },
-            confirmation: function() {
+            confirmation: function () {
                 // =================================================================================
                 // GET ADDRESS
                 var shippingAddress = {
@@ -653,7 +844,7 @@ define(
                     var shippingAddressStreet = checkoutProvider['street'];
                     var shippingAddressStreetString = '';
                     if (shippingAddressStreet && shippingAddressStreet.length > 0) {
-                        shippingAddressStreet.forEach(function(item, index) {
+                        shippingAddressStreet.forEach(function (item, index) {
                             if (shippingAddressStreetString == '') {
                                 shippingAddressStreetString += item;
                             } else {
@@ -686,7 +877,7 @@ define(
                         var shippingAddressStreet = checkoutProvider['street'];
                         var shippingAddressStreetString = '';
                         if (shippingAddressStreet && shippingAddressStreet.length > 0) {
-                            shippingAddressStreet.forEach(function(item, index) {
+                            shippingAddressStreet.forEach(function (item, index) {
                                 if (shippingAddressStreetString == '') {
                                     shippingAddressStreetString += item;
                                 } else {
@@ -719,7 +910,7 @@ define(
                         }
                         address = addressList.join(', ');
                         if (shippingAddress['region_id'] != '' && shippingAddress['city'] != '') {
-                            var html = DPD_Confirmation(address, shippingAddress['country_id'], shippingAddress['city']);
+                            var html = DPD_Confirmation(address, shippingAddress['country_id'], shippingAddress['postcode']);
                             if (html) {
                                 $('.js-dpdro-confirmation').html(html);
                                 $('.js-dpdro-confirmation').removeClass('dpdro-hide');
@@ -735,7 +926,7 @@ define(
                 }
             },
             connected: false,
-            initialize: function() {
+            initialize: function () {
                 if (connected == 'success' && checkActive) {
                     this.connected = true;
                 }

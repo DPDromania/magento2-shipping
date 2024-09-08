@@ -665,8 +665,21 @@ class Ajax
 		}
 		return false;
 	}
-	public function DPD_GetShippingTax($serviceID = false, $includeShipping = false, $orderID = false, $salesAddress = false)
-	{
+
+	/**
+	 * @param bool|false $serviceID
+	 * @param bool|false $includeShipping
+	 * @param int|false $orderID
+	 * @param string|false $salesAddress
+	 * 
+	 * @return string
+	 */
+	public function DPD_GetShippingTax(
+		$serviceID = false, 
+		$includeShipping = false, 
+		$orderID = false, 
+		$salesAddress = false
+	): string {
 		$apiSettings = $this->Settings();
 		$parameters = [
 			'api' => 'calculate',
@@ -682,16 +695,20 @@ class Ajax
 				'shipmentNote' => '',
 			]
 		];
+
 		if ($serviceID) {
 			$parameters['data']['service']['serviceIds'] = array($serviceID);
 		}
+
 		if ($apiSettings['payerCourier'] === 'THIRD_PARTY') {
 			$parameters['data']['payment']['thirdPartyClientId'] = $apiSettings['payerCourierThirdParty'];
 		}
+
 		// ====================================================
 		// Products parameters
 		$totalWeight = 0;
 		$totalPrice = 0;
+
 		if ($orderID) {
 			$order_data = $this->Magento_GetOrderData($orderID);
 			foreach ($order_data['products'] as $product) {
@@ -702,11 +719,13 @@ class Ajax
 				$totalPrice  = (float) $totalPrice + ((float) $price * (float) $quantity);
 			}
 		} else {
+
 			if ($salesAddress) {
 				$cart_data = $this->Magento_GetCartData(true);
 			} else {
 				$cart_data = $this->Magento_GetCartData();
 			}
+
 			foreach ($cart_data['products'] as $product) {
 				$price       = $product['price'];
 				$weight      = $product['weight'];
@@ -714,6 +733,7 @@ class Ajax
 				$totalWeight = (float) $totalWeight + ((float) $weight * (float) $quantity);
 				$totalPrice  = (float) $totalPrice + ((float) $price * (float) $quantity);
 			}
+
 		}
 		// ====================================================
 		// Parcels parameters
@@ -724,7 +744,9 @@ class Ajax
 			'documents'    => false,
 			'parcels'      => []
 		];
+
 		if ((float) $totalWeight > (float) $apiSettings['maxParcelWeight']) {
+
 			if ($orderID) {
 				$products = $this->Magento_GetOrderData($orderID);
 			} else {
@@ -734,6 +756,7 @@ class Ajax
 					$products = $this->Magento_GetCartData();
 				}
 			}
+
 			$parcels = $this->DPD_PrepareParcels($products);
 			$parameters['data']['content']['parcelsCount'] = (int) count($parcels);
 			$parameters['data']['content']['parcels'] = $parcels;
@@ -745,6 +768,7 @@ class Ajax
 				]
 			];
 		}
+
 		// ====================================================
 		// Address parameters
 		if ($orderID) {
@@ -752,6 +776,7 @@ class Ajax
 		} else {
 			$address = $this->Magento_GetCartAdress($salesAddress);
 		}
+
 		$countryData = $this->GetCountryByID($address['country']);
 		// ====================================================
 		if ($address['country'] == 'RO' || $address['country'] == 'BG') {
@@ -822,6 +847,7 @@ class Ajax
 				$parameters['data']['recipient']['addressLocation']['postCode'] = (string) $address['postcode'];
 			}
 		}
+
 		if ($serviceID && $includeShipping) {
 			$obj = ObjectManager::getInstance();
 			$store = $obj->get('Magento\Store\Model\StoreManagerInterface');
@@ -835,14 +861,18 @@ class Ajax
 				'includeShippingPrice' => true
 			];
 		}
+
 		if ($apiSettings['senderPayerInsurance'] === 'yes') {
 			$parameters['data']['service']['additionalServices']['declaredValue']['amount'] = number_format((float) $totalPrice, 2);
 		}
+		
 		$parameters['data']['recipient']['phone1']['number'] = (string) $address['phone'];
 		$parameters['data']['recipient']['email'] = (string) $address['email'];
 		$requestResponse = $this->ApiRequest($parameters);
+
 		return $requestResponse;
 	}
+
 	public function DPD_GetShippingTaxByRequest($request, $serviceId = false, $includeShipping = false)
 	{
 		$obj               = ObjectManager::getInstance();
@@ -1736,6 +1766,7 @@ class Ajax
 		];
 		return $data;
 	}
+
 	public function Magento_CurrencyConvert($price, $serviceCurrency = false)
 	{
 		if (!$price) {
@@ -1756,6 +1787,7 @@ class Ajax
 		$price = (float) $price * (float) $currencyRate;
 		return (float) $price;
 	}
+
 	public function Magento_AvailableCurrencyCodes()
 	{
 		$obj = ObjectManager::getInstance();

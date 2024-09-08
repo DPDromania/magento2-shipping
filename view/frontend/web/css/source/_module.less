@@ -1,0 +1,75 @@
+.dpdro-confirmation {
+
+    .dpdro-shipping-method-office-locator {
+        border: 0;
+        display: none;
+        height: 700px;
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .new-pickup-address {
+        display: none;
+    }
+
+    .pickup-address {
+        &:extend(.abs-add-box-sizing all);
+        .lib-css(border, @checkout-shipping-item__border);
+        .lib-css(line-height, @checkout-shipping-item__line-height);
+        .lib-css(margin, @checkout-shipping-item__margin);
+        .lib-css(padding, @checkout-shipping-item__padding);
+        .lib-css(transition, @checkout-shipping-item__transition);
+        .lib-css(width, @checkout-shipping-item-tablet__width);
+        .lib-css(border-color, @checkout-shipping-item__active__border-color);
+        display: none;
+        font-size: @font-size__base;
+        position: relative;
+        vertical-align: top;
+        word-wrap: break-word;
+        font-weight: 400;
+
+        &:after {
+            .lib-css(background, @checkout-shipping-item-icon__background-color);
+            .lib-css(color, @checkout-shipping-item-icon__color);
+            .lib-css(content, @checkout-shipping-item-icon__content);
+            .lib-css(font-family, @icons__font-name);
+            .lib-css(height, @checkout-shipping-item-icon__selected__height);
+            .lib-css(width, @checkout-shipping-item-icon__selected__width);
+            font-size: 27px;
+            line-height: 21px;
+            padding-top: 2px;
+            position: absolute;
+            right: 0;
+            text-align: center;
+            top: 0;
+        }
+
+    }
+
+}
+
+//
+//  Mobile
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum ='max') and (@break =@screen__s) {
+
+    .dpdro-confirmation {
+
+        .pickup-address {
+            width: 100%;
+        }
+    }
+
+}
+
+.media-width(@extremum, @break) when (@extremum ='min') and (@break =@screen__l) {
+
+    .dpdro-confirmation {
+
+        .pickup-address {
+            .lib-css(width, @checkout-shipping-item__width);
+        }
+    }
+
+}
