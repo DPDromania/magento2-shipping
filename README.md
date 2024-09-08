@@ -25,3 +25,11 @@ $ bin/magento setup:upgrade
 $ bin/magento setup:di:compile
 $ bin/magento setup:static-content:deploy
 ```
+
+## Locator Widget
+
+The locator widget allows you to choose your preferred pickup location
+
+![ScreenShot](https://raw.githubusercontent.com/DPDromania/magento2-shipping/main/Snapshot/locator-widget-map.png)
+
+![ScreenShot](https://raw.githubusercontent.com/DPDromania/magento2-shipping/main/Snapshot/locator-widget-selection.png)

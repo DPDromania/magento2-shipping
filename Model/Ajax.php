@@ -679,7 +679,7 @@ class Ajax
 		$includeShipping = false, 
 		$orderID = false, 
 		$salesAddress = false
-	): array {
+	) {
 		$apiSettings = $this->Settings();
 		$parameters = [
 			'api' => 'calculate',
