@@ -165,47 +165,11 @@ class Shipment extends Action
         $orderCountryID = $orderData->getShippingAddress()->getCountryId();
         
         if ($paymentMethodCode && $paymentMethodCode == 'dpdro_payment') {
-            $codTax = 0;
-            $codVat = 0;
-            $paymentTax = $this->customAjax->DPD_GetPaymentTaxByCountryID($orderCountryID);
-            if ($paymentTax && !empty($paymentTax)) {
-                if (isset($paymentTax['tax'])) {
-                    $codTax = $paymentTax['tax'];
-                }
-                if (isset($paymentTax['vat'])) {
-                    $codVat = $paymentTax['vat'];
-                }
-            }
-            $codFullTax = 0;
-            if ($codTax > 0) {
-                $codFullTax = $codFullTax + floatval($codTax);
-                if ($codVat > 0) {
-                    $codFullTax = $codFullTax + (floatval($codTax) * floatval($codVat) / 100);
-                }
-            }
-            $codFullTaxTotal = (float) $codFullTax + ((float) $serviceCodTaxPriceConverted - (float) $shippingPrice);
-            $orderProductsPrice = (float) $orderTotal - (float) $shippingPrice - (float) $codFullTaxTotal;
-            $orderDataProductsTotal = (float) $this->customAjax->Magento_CurrencyConvert(($orderProductsPrice + $codFullTax), 'RON');
-            $codPaymentDeclaredValue = $this->customAjax->Magento_CurrencyConvert(($orderProductsPrice), 'RON');
-            $currencyCode = $orderData->getOrderCurrencyCode();
             $parameters['data']['service']['additionalServices']['cod'] = [
-                'currencyCode' => $currencyCode,
-                'processingType' => 'CASH'
+                'currencyCode' => $orderData->getOrderCurrencyCode(),
+                'processingType' => 'CASH',
+                'amount' => $orderData->getGrandTotal()
             ];
-            if ($settings['shippingTaxRate'] === 'yes') {
-                if ($settings['courierService'] === 'RECIPIENT') {
-                    // Recipient pay the tax
-                } else {
-                    $orderDataProductsTotal = (float) $this->customAjax->Magento_CurrencyConvert($orderTotal, 'RON');
-                }
-            } else {
-                if ($settings['courierService'] === 'RECIPIENT' || $settings['includeShipping'] === 'no') {
-                    // Recipient pay the tax
-                } else {
-                    $parameters['data']['service']['additionalServices']['cod']['includeShippingPrice'] = true;
-                }
-            }
-            $parameters['data']['service']['additionalServices']['cod']['amount'] = (float) $orderDataProductsTotal;
         } else {
             $parameters['data']['payment']['courierServicePayer'] = 'SENDER';
         }
