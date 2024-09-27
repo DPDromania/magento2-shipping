@@ -165,11 +165,18 @@ class Shipment extends Action
         $orderCountryID = $orderData->getShippingAddress()->getCountryId();
         
         if ($paymentMethodCode && $paymentMethodCode == 'dpdro_payment') {
+            $amount = $orderData->getGrandTotal();
+
+            if ($settings['courierService'] === 'RECIPIENT') {
+                $amount = $orderData->getSubtotal();
+            }
+
             $parameters['data']['service']['additionalServices']['cod'] = [
                 'currencyCode' => $orderData->getOrderCurrencyCode(),
                 'processingType' => 'CASH',
-                'amount' => $orderData->getGrandTotal()
+                'amount' => $amount
             ];
+
         } else {
             $parameters['data']['payment']['courierServicePayer'] = 'SENDER';
         }
