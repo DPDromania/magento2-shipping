@@ -209,6 +209,7 @@ class Shipment extends Action
 
         $apiAddress = $this->customAjax->DPD_GetAddressNormalizedByOrderID($data['orderID']);
 
+        
         if ($apiAddress && !empty($apiAddress)) {
             if ($apiAddress['method'] && $apiAddress['method'] === 'pickup') {
                 $parameters['data']['recipient']['pickupOfficeId'] = (int) $apiAddress['officeID'];
@@ -227,6 +228,8 @@ class Shipment extends Action
                 } else {
                     if (isset($apiAddress['addressCityName']) &&  !empty($apiAddress['addressCityName'])) {
                         $parameters['data']['recipient']['address']['siteName'] = $this->customAjax->ReplaceDiacritics($apiAddress['addressCityName']);
+                    }else {
+                        $parameters['data']['recipient']['address']['siteName'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('city'));
                     }
                 }
                 if ($apiAddress['status'] && !empty($apiAddress['status']) && $apiAddress['status'] == 'skip') {
@@ -259,6 +262,17 @@ class Shipment extends Action
                             $parameters['data']['recipient']['address']['streetNo'] = (int) $data['shipmentValidation']['number'];
                         }
                     } else {
+                        $parameters['data']['recipient']['address']['addressLine1'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
+                        $parameters['data']['recipient']['address']['streetName'] = $this->customAjax->ReplaceDiacritics($orderData->getShippingAddress()->getData('street'));
+
+                        if (strlen($parameters['data']['recipient']['address']['addressLine1']) > 50) {
+                            $parameters['data']['recipient']['address']['addressLine1'] = substr($parameters['data']['recipient']['address']['addressLine1'], 0, 50);
+                        }
+
+                        if (strlen($parameters['data']['recipient']['address']['streetName']) > 50) {
+                            $parameters['data']['recipient']['address']['streetName'] = substr($parameters['data']['recipient']['address']['streetName'], 0, 50);
+                        }
+
                         if (isset($apiAddress['addressStreetID']) &&  !empty($apiAddress['addressStreetID'])) {
                             $parameters['data']['recipient']['address']['streetId'] = $apiAddress['addressStreetID'];
                         } else {
@@ -326,8 +340,9 @@ class Shipment extends Action
                 $parameters['data']['recipient']['address']['postCode'] = trim($orderData->getShippingAddress()->getData('postcode'));
             }
         }
-        
+    
         $requestAddShipment = $this->customAjax->ApiRequest($parameters);
+
         if (!is_array($requestAddShipment) || empty($requestAddShipment) || array_key_exists('error', $requestAddShipment)) {
             $response['error'] = true;
             $response['msg'] = $requestAddShipment['error'];
@@ -350,13 +365,16 @@ class Shipment extends Action
                 'pickup'        => $requestAddShipment['pickupDate'],
                 'deadline'      => $deadline
             ];
+
             $orderShipmentID = $this->_addShipment($orderShipmentData);
+
             if ($orderShipmentID && !empty($orderShipmentID)) {
                 $response['error'] = false;
             } else {
                 $response['error'] = true;
             }
         }
+        
         return $response;
     }
     public function _addShipment($data)
